@@ -1,0 +1,26 @@
+{
+  "id": "/",
+  "name": "AVENOR — Life Operating System",
+  "short_name": "AVENOR",
+  "description": "One place for your goals, projects, home, vehicles, documents, family and finances. Offline-first.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#11182A",
+  "theme_color": "#11182A",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["productivity", "lifestyle", "finance"],
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Emergency Mode", "short_name": "Emergency", "url": "/?emergency=1", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Projects", "url": "/#projects", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Vault", "url": "/#vault", "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}
