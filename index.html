@@ -224,6 +224,8 @@ h1.page{font-family:var(--font-d);font-size:30px;line-height:1.15;font-weight:40
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 <div class="emg" id="emg" role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast" role="status"></div>
+<script src="/config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ================= AVENOR CORE =================
    Offline-first: local storage is the source of truth.
@@ -252,7 +254,7 @@ const blank = ()=>({
 });
 let S = Object.assign(blank(), store.get('avenor')||{});
 S.finance = Object.assign({bills:[],subs:[],debts:[],assets:[]}, S.finance||{});
-function save(){ store.set('avenor',S); }
+function save(){ store.set('avenor',S); if(typeof schedulePush==='function') schedulePush(); }
 function log(t){ S.activity.unshift({t, at:Date.now()}); S.activity=S.activity.slice(0,20); }
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); }
 
@@ -542,7 +544,9 @@ V.settings = ()=>{
   return `
   <span class="eyebrow">Settings</span>
   <h1 class="page">Your AVENOR.</h1>
-  <p class="sub">Everything lives on this device until you say otherwise.</p>
+  <p class="sub">${isPremium()?'Backed up to the cloud and synced across your devices.':'Everything lives on this device until you say otherwise.'}</p>
+
+  ${accountCard()}
 
   <div class="section">
     <span class="eyebrow">Profile</span>
@@ -569,7 +573,7 @@ V.settings = ()=>{
     <span class="eyebrow">About</span>
     <div class="card rowlist" style="margin-top:12px">
       <a class="row" href="/privacy.html" style="text-decoration:none;color:inherit"><div class="grow"><div class="title">Privacy policy</div><div class="meta">Short version: your data never leaves this device</div></div><span class="chip">View</span></a>
-      <div class="row"><div class="grow"><div class="title">Version</div><div class="meta">AVENOR 1.1 — offline-first</div></div></div>
+      <div class="row"><div class="grow"><div class="title">Version</div><div class="meta">AVENOR 1.2 — offline-first, cloud-ready</div></div></div>
     </div>
   </div>
 
@@ -618,6 +622,159 @@ function eraseAll(){
   if(!confirm('Erase ALL AVENOR data on this device? Download a backup first if you want to keep anything.')) return;
   if(!confirm('Last check — this permanently deletes everything. Continue?')) return;
   S = blank(); save(); go('today'); render(); toast('Everything erased');
+}
+
+/* ================= CLOUD (Supabase + Stripe) ================= */
+let sb=null, sbSession=null, sbProfile=null, pushTimer=null, syncState='off'; // off|idle|syncing|synced|error
+
+function cloudConfigured(){
+  return typeof window.supabase!=='undefined' && window.AVENOR_CONFIG &&
+         AVENOR_CONFIG.SUPABASE_URL && AVENOR_CONFIG.SUPABASE_ANON_KEY;
+}
+function isPremium(){ return !!(sbProfile && (sbProfile.status==='active'||sbProfile.status==='trialing')); }
+function countItems(st){ return st.goals.length+st.projects.length+st.home.length+st.vehicles.length+st.vault.length+st.family.length+st.finance.bills.length+st.finance.subs.length+st.finance.debts.length+st.finance.assets.length; }
+
+async function cloudInit(){
+  if(!cloudConfigured()) return;
+  sb = window.supabase.createClient(AVENOR_CONFIG.SUPABASE_URL, AVENOR_CONFIG.SUPABASE_ANON_KEY);
+  const { data:{ session } } = await sb.auth.getSession();
+  sbSession = session;
+  sb.auth.onAuthStateChange((_evt, s)=>{ const wasOut=!sbSession; sbSession=s; if(s && wasOut) afterLogin(); if(!s){ sbProfile=null; syncState='off'; render(); } });
+  if(sbSession) await afterLogin(); else render();
+}
+async function afterLogin(){
+  try{
+    await refreshProfile();
+    if(isPremium()) await firstSync();
+  }catch(e){ console.error(e); }
+  render();
+}
+async function refreshProfile(){
+  if(!sb||!sbSession) return;
+  const { data } = await sb.from('profiles').select('*').eq('id', sbSession.user.id).single();
+  sbProfile = data || null;
+}
+async function firstSync(){
+  syncState='syncing'; render();
+  const { data, error } = await sb.from('user_state').select('data, updated_at').eq('user_id', sbSession.user.id).maybeSingle();
+  if(error){ syncState='error'; render(); return; }
+  if(!data){ await pushNow(); return; }                      // nothing in cloud yet → upload local
+  if(!countItems(S)){                                         // this device is empty → pull cloud
+    S = Object.assign(blank(), data.data);
+    S.finance = Object.assign({bills:[],subs:[],assets:[],debts:[]}, S.finance||{});
+    save(); syncState='synced'; render(); toast('Restored from cloud'); return;
+  }
+  // Both sides have data → let the user decide once
+  openSheet(`<h3>Two versions found</h3>
+    <p class="sub" style="margin:-6px 0 16px">This device and your cloud account both have AVENOR data. Which should win? The other is replaced.</p>
+    <div class="actions" style="flex-direction:column">
+      <button class="btn btn-ink" onclick="resolveSync('local')">Keep this device (${countItems(S)} items) → upload</button>
+      <button class="btn btn-ghost" onclick="resolveSync('cloud')">Keep cloud (last synced ${new Date(data.updated_at).toLocaleDateString()}) → download</button>
+    </div>`);
+  window._cloudData = data.data;
+}
+async function resolveSync(which){
+  closeSheet();
+  if(which==='cloud'){
+    S = Object.assign(blank(), window._cloudData||{});
+    S.finance = Object.assign({bills:[],subs:[],assets:[],debts:[]}, S.finance||{});
+    save(); syncState='synced'; render(); toast('Cloud version restored');
+  } else { await pushNow(); toast('Device version uploaded'); }
+  window._cloudData = null;
+}
+function schedulePush(){
+  if(!sb||!sbSession||!isPremium()) return;
+  syncState='syncing'; clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushNow, 1800);
+}
+async function pushNow(){
+  if(!sb||!sbSession||!isPremium()) return;
+  const { error } = await sb.from('user_state').upsert({
+    user_id: sbSession.user.id, data: S, updated_at: new Date().toISOString()
+  });
+  syncState = error ? 'error' : 'synced';
+  const el=document.getElementById('syncline'); if(el) el.textContent=syncLabel();
+}
+function syncLabel(){
+  return {off:'Sync off', idle:'Sync ready', syncing:'Syncing…', synced:'All changes synced', error:'Sync error — will retry on next change'}[syncState];
+}
+
+/* ---- auth (email code, no passwords) ---- */
+function sheetSignIn(){
+  openSheet(`<h3>Sign in to AVENOR</h3>
+  <p class="sub" style="margin:-6px 0 16px">We email you a 6-digit code. No password to remember or lose.</p>
+  ${FLD('si_e','Email','email','','you@example.com')}
+  <div class="actions"><button class="btn btn-ink" onclick="sendCode()">Email me a code</button></div>`);
+}
+async function sendCode(){
+  const email=fval('si_e'); if(!email||!email.includes('@')) return toast('Enter your email');
+  const { error } = await sb.auth.signInWithOtp({ email, options:{ shouldCreateUser:true } });
+  if(error) return toast(error.message||'Could not send code');
+  openSheet(`<h3>Check your email</h3>
+  <p class="sub" style="margin:-6px 0 16px">Enter the 6-digit code sent to <b>${esc(email)}</b>.</p>
+  ${FLD('si_c','Code','text','','123456')}
+  <div class="actions"><button class="btn btn-ink" onclick="verifyCode('${esc(email)}')">Verify & sign in</button></div>`);
+}
+async function verifyCode(email){
+  const token=fval('si_c'); if(!token) return toast('Enter the code');
+  const { error } = await sb.auth.verifyOtp({ email, token, type:'email' });
+  if(error) return toast('That code didn\u2019t work — try again');
+  closeSheet(); toast('Signed in');
+}
+async function signOut(){ await sb.auth.signOut(); toast('Signed out'); }
+
+/* ---- billing ---- */
+async function startCheckout(interval){
+  if(!sbSession) return sheetSignIn();
+  toast('Opening secure checkout…');
+  try{
+    const r = await fetch('/api/create-checkout-session',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+sbSession.access_token},
+      body: JSON.stringify({ interval })
+    });
+    const j = await r.json();
+    if(j.url) location.href=j.url; else toast(j.error||'Checkout unavailable');
+  }catch(e){ toast('Checkout unavailable right now'); }
+}
+async function openPortal(){
+  try{
+    const r = await fetch('/api/create-portal-session',{
+      method:'POST', headers:{'Authorization':'Bearer '+sbSession.access_token}
+    });
+    const j = await r.json();
+    if(j.url) location.href=j.url; else toast(j.error||'Portal unavailable');
+  }catch(e){ toast('Portal unavailable right now'); }
+}
+
+function accountCard(){
+  if(!cloudConfigured()) return `<div class="section"><span class="eyebrow">Account & Sync</span>
+    <div class="card pad" style="margin-top:12px"><p style="font-size:14px;color:var(--ink-2)">Cloud sync isn\u2019t configured on this deployment yet. Add your Supabase keys to <span class="mono">config.js</span> — see the setup guide.</p></div></div>`;
+  if(!sbSession) return `<div class="section"><span class="eyebrow">Account & Sync</span>
+    <div class="card pad" style="margin-top:12px">
+      <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px"><b>AVENOR Premium</b> backs up your life record to the cloud and syncs it across every device — phone, tablet, desktop. 14-day free trial.</p>
+      <button class="btn btn-ink" style="width:100%" onclick="sheetSignIn()">Sign in / Create account</button>
+    </div></div>`;
+  if(!isPremium()) return `<div class="section"><span class="eyebrow">Account & Sync</span>
+    <div class="card pad" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b>${esc(sbSession.user.email)}</b><span class="chip">Free plan</span></div>
+      <p style="font-size:14px;color:var(--ink-2);margin:10px 0 14px">Upgrade to Premium for cloud backup, multi-device sync, and an unlimited vault. <b>14 days free</b>, cancel anytime.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-ink" style="flex:1;min-width:130px" onclick="startCheckout('monthly')">$6 / month</button>
+        <button class="btn btn-ghost" style="flex:1;min-width:130px" onclick="startCheckout('yearly')">$48 / year</button>
+      </div>
+      <button class="btn-quiet" style="width:100%;margin-top:10px" onclick="signOut()">Sign out</button>
+    </div></div>`;
+  return `<div class="section"><span class="eyebrow">Account & Sync</span>
+    <div class="card pad" style="margin-top:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center"><b>${esc(sbSession.user.email)}</b><span class="chip brass">Premium${sbProfile.status==='trialing'?' · trial':''}</span></div>
+      <p id="syncline" class="meta" style="margin-top:8px;font-size:13px;color:var(--ink-3)">${syncLabel()}</p>
+      ${sbProfile.current_period_end?`<p class="meta" style="font-size:12.5px;color:var(--ink-3)">${sbProfile.status==='trialing'?'Trial ends':'Renews'} ${new Date(sbProfile.current_period_end).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</p>`:''}
+      <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap">
+        <button class="btn btn-ghost" style="flex:1" onclick="openPortal()">Manage billing</button>
+        <button class="btn btn-ghost" style="flex:1" onclick="signOut()">Sign out</button>
+      </div>
+    </div></div>`;
 }
 
 /* ---------- sheets (forms) ---------- */
@@ -731,6 +888,7 @@ function sheetDoc(id){
 }
 function saveDoc(id){
   const t=fval('d_t'); if(!t) return toast('Name the document');
+  if(!id && S.vault.length>=25 && !isPremium()){ closeSheet(); toast('Free plan holds 25 documents — Premium is unlimited'); go('settings'); return; }
   const data={title:t,category:fval('d_c'),ref:fval('d_r'),expires:fval('d_e')};
   if(id){Object.assign(S.vault.find(x=>x.id===id),data);} else S.vault.push({id:uid(),...data});
   save(); closeSheet(); render(); toast('Filed in the vault');
@@ -827,6 +985,7 @@ function init(){
   render();
 }
 init();
+cloudInit();
 
 /* PWA: service worker + launch splash + shortcut handling */
 if ('serviceWorker' in navigator) {

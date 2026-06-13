@@ -1,10 +1,11 @@
 /* AVENOR service worker — offline-first */
-const VERSION = 'avenor-v2';
+const VERSION = 'avenor-v3';
 const SHELL = [
   '/',
   '/index.html',
   '/manifest.json',
   '/privacy.html',
+  '/config.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
   '/icons/maskable-192.png',

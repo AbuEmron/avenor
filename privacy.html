@@ -38,7 +38,7 @@ a{color:var(--brass)}
   <p class="date">Effective June 12, 2026</p>
 
   <div class="card">
-    <p><b>The short version:</b> everything you put into AVENOR — your goals, projects, documents, family details, finances, and emergency information — is stored only on your own device. We do not collect it, transmit it, see it, or sell it. We can't: there is no server holding your data.</p>
+    <p><b>The short version:</b> by default, everything you put into AVENOR stays on your own device — we do not collect it, see it, or sell it. If you opt into a Premium account, your data is additionally backed up to your private, access-controlled cloud space so it can sync across your devices. Nothing is ever sold or shared.</p>
   </div>
 
   <h2>What AVENOR stores, and where</h2>
@@ -52,6 +52,12 @@ a{color:var(--brass)}
 
   <h2>Emergency Mode and medical information</h2>
   <p>Any medical notes, emergency contacts, or insurance details you add exist solely on your device so they're available to you instantly, even offline. They are never uploaded or shared.</p>
+
+  <h2>Optional account and cloud sync (Premium)</h2>
+  <p>AVENOR works fully offline with no account. If you choose to create an account and subscribe to Premium, two things change: we store your email address (for sign-in codes) and, if sync is enabled, an encrypted-in-transit copy of your AVENOR data is stored in our database (hosted by Supabase) so it can be backed up and synced across your devices. That data is protected by row-level security — only your authenticated account can read it — and it is never sold, shared, or used for advertising. Deleting your account deletes this data.</p>
+
+  <h2>Payments</h2>
+  <p>Premium subscriptions are processed by Stripe. Your card details go directly to Stripe and never touch our servers; we receive only your subscription status. Stripe's handling of your payment information is governed by its own privacy policy.</p>
 
   <h2>Children</h2>
   <p>AVENOR is a general-audience household tool and does not knowingly collect information from anyone — children included — because it does not collect information at all.</p>
