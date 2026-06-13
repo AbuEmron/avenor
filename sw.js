@@ -1,5 +1,5 @@
 /* AVENOR service worker — offline-first */
-const VERSION = 'avenor-v8';
+const VERSION = 'avenor-v9';
 const SHELL = [
   '/',
   '/index.html',

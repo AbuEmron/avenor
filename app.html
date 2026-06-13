@@ -311,20 +311,51 @@ function renderNav(){
 
 /* ---------- life pulse score ---------- */
 function pulse(){
-  let score=72, notes=[];
+  const BASE=72;
+  const factors=[];          // {label, delta, hint, goto}
   const allTasks = S.projects.flatMap(p=>p.tasks||[]);
+
   const overdue = allTasks.filter(t=>!t.done && t.due && daysUntil(t.due)<0).length;
-  score -= Math.min(20, overdue*4);
-  if(overdue) notes.push(`<b>${overdue}</b> overdue task${overdue>1?'s':''}`);
+  if(overdue) factors.push({label:`${overdue} overdue task${overdue>1?'s':''}`, delta:-Math.min(20,overdue*4), hint:'Catch up or reschedule to recover points', goto:'projects'});
+
   const renewals = renewalFeed().filter(r=>r.days!==null && r.days<=14).length;
-  score -= Math.min(15, renewals*5);
-  if(renewals) notes.push(`<b>${renewals}</b> renewal${renewals>1?'s':''} due within 14 days`);
+  if(renewals) factors.push({label:`${renewals} renewal${renewals>1?'s':''} due within 14 days`, delta:-Math.min(15,renewals*5), hint:'Handle these in Watch before they lapse', goto:'watch'});
+
+  const expired = S.vault.filter(d=>d.expires && daysUntil(d.expires)<0).length;
+  if(expired) factors.push({label:`${expired} expired document${expired>1?'s':''}`, delta:-Math.min(12,expired*4), hint:'Renew and update the expiry in your Vault', goto:'vault'});
+
   const activeGoals = S.goals.length;
-  if(activeGoals){ score += Math.min(15, activeGoals*3); notes.push(`<b>${activeGoals}</b> active goal${activeGoals>1?'s':''}`); }
+  if(activeGoals) factors.push({label:`${activeGoals} active goal${activeGoals>1?'s':''}`, delta:Math.min(15,activeGoals*3), hint:'Direction set — projects move these forward', goto:'goals'});
+
   const doneToday = allTasks.filter(t=>t.done && t.doneAt && (Date.now()-t.doneAt)<86400000).length;
-  if(doneToday){ score += Math.min(10, doneToday*2); notes.push(`<b>${doneToday}</b> completed today`); }
-  if(!notes.length) notes.push('Add goals, projects and renewals to bring Avenor to life.');
-  return {score: Math.max(8, Math.min(99, score)), notes};
+  if(doneToday) factors.push({label:`${doneToday} completed today`, delta:Math.min(10,doneToday*2), hint:'Momentum counts', goto:'projects'});
+
+  const scans = S.vault.filter(d=>d.scan).length;
+  if(scans) factors.push({label:`${scans} document${scans>1?'s':''} secured`, delta:Math.min(8,scans*2), hint:'Encrypted and tracked in your Vault', goto:'vault'});
+
+  if(S.lastBackup && (Date.now()-S.lastBackup)<30*86400000) factors.push({label:'Recent backup on file', delta:5, hint:'Your data is protected', goto:'settings'});
+
+  const raw = BASE + factors.reduce((a,f)=>a+f.delta,0);
+  const score = Math.max(8, Math.min(99, raw));
+  const notes = factors.length ? factors.slice(0,4).map(f=>`<b>${f.label.split(' ')[0]}</b> ${f.label.split(' ').slice(1).join(' ')}`) : ['Add goals, scan a document, or set a renewal to bring AVENOR to life.'];
+  return {score, base:BASE, factors, notes};
+}
+
+function sheetPulse(){
+  const p=pulse();
+  const band = p.score>=80?'Strong':p.score>=60?'Steady':p.score>=40?'Needs attention':'At risk';
+  const row=f=>`<button class="row" style="width:100%;text-align:left" onclick="closeSheet();go('${f.goto}')">
+    <div class="grow"><div class="title">${esc(f.label)}</div><div class="meta">${esc(f.hint)}</div></div>
+    <span class="chip ${f.delta<0?'red':'green'}">${f.delta>0?'+':''}${f.delta}</span></button>`;
+  openSheet(`<h3>Your Life Pulse: ${p.score}</h3>
+    <p class="sub" style="margin:-6px 0 14px">${band}. This score is a transparent estimate — here\u2019s exactly what shapes it. Tap any item to act on it.</p>
+    <div class="card rowlist">
+      <div class="row"><div class="grow"><div class="title">Starting balance</div><div class="meta">Everyone begins here</div></div><span class="chip">${p.base}</span></div>
+      ${p.factors.length?p.factors.map(row).join(''):'<div class="empty"><p>Nothing is affecting your score yet. Add goals and documents to see it respond.</p></div>'}
+      <div class="row" style="background:var(--porcelain)"><div class="grow"><div class="title">Your Life Pulse</div><div class="meta">Capped between 8 and 99</div></div><span class="chip brass">${p.score}</span></div>
+    </div>
+    <p class="meta" style="margin-top:12px;font-size:12.5px;color:var(--ink-3)">Life Pulse is a guide, not a judgment. It reflects only what you\u2019ve put into AVENOR.</p>
+    <div class="actions"><button class="btn btn-ink" onclick="closeSheet()">Got it</button></div>`);
 }
 function renewalFeed(){
   const out=[];
@@ -555,8 +586,11 @@ V.today = ()=>{
   <h1 class="page">${greet}${S.profile.name?', '+esc(S.profile.name):''}.</h1>
   <p class="sub">${new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</p>
 
-  <div class="section pulsecard">
-    <span class="eyebrow">Life Pulse</span>
+  <button class="section pulsecard" onclick="sheetPulse()" style="display:block;width:100%;text-align:left;cursor:pointer" aria-label="View Life Pulse breakdown">
+    <span class="eyebrow" style="display:flex;justify-content:space-between;align-items:center">Life Pulse
+      <span style="font-family:var(--font-b);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:none;color:var(--brass-2);display:inline-flex;align-items:center;gap:4px">How it's scored
+        <svg width="13" height="13" viewBox="0 0 24 24" style="stroke:var(--brass-2);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6l6 6-6 6"/></svg></span>
+    </span>
     <div class="gaugewrap">
       <svg class="gauge" viewBox="0 0 108 108" role="img" aria-label="Life pulse ${p.score} of 100">
         <circle class="track" cx="54" cy="54" r="46" fill="none" stroke-width="5"/>
@@ -566,7 +600,7 @@ V.today = ()=>{
       </svg>
       <div class="pulsefacts">${p.notes.map(n=>`<span>${n}</span>`).join('')}</div>
     </div>
-  </div>
+  </button>
 
   ${(totalSaved()||moneyAtRisk())?`<div class="section grid2">
     ${totalSaved()?`<button class="stat" style="text-align:left;cursor:pointer" onclick="go('watch')"><div class="k">Saved with Avenor</div><div class="v" style="color:var(--verdant)">${fmtMoney(totalSaved())}</div></button>`:''}
@@ -943,7 +977,7 @@ V.settings = ()=>{
     <span class="eyebrow">About</span>
     <div class="card rowlist" style="margin-top:12px">
       <a class="row" href="privacy.html" style="text-decoration:none;color:inherit"><div class="grow"><div class="title">Privacy policy</div><div class="meta">Short version: your data never leaves this device</div></div><span class="chip">View</span></a>
-      <div class="row"><div class="grow"><div class="title">Version</div><div class="meta">AVENOR 1.7 — Drop Anything + Trust Center</div></div></div>
+      <div class="row"><div class="grow"><div class="title">Version</div><div class="meta">AVENOR 1.8 — transparent Life Pulse</div></div></div>
     </div>
   </div>
 

@@ -107,12 +107,17 @@ a{color:inherit;text-decoration:none}
 .exp h3{font-family:var(--fd);font-weight:400;font-size:clamp(24px,4vw,32px);margin:8px 0 10px;min-height:2.2em}
 .exp p{color:var(--ink3);font-size:16px;min-height:3em}
 .exp .track{display:flex;gap:6px;margin:22px 0 16px}
-.exp .track i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;position:relative}
+.exp .track i{flex:1;height:4px;border-radius:3px;background:rgba(255,255,255,.22);overflow:hidden;position:relative;cursor:pointer}
 .exp .track i b{position:absolute;inset:0;background:var(--brass2);transform:scaleX(0);transform-origin:left;border-radius:3px;will-change:transform}
-.exp .ctl{display:flex;align-items:center;gap:14px}
-.exp .ctl button{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--porc);border:1px solid rgba(255,255,255,.2);padding:9px 16px;border-radius:999px;transition:border-color .18s}
-.exp .ctl button:hover{border-color:rgba(255,255,255,.5)}
-.exp .ctl .step{font-family:var(--fm);font-size:12px;color:var(--ink3);margin-left:auto}
+.exp .ctl{display:flex;align-items:center;gap:12px}
+.exp .ctl button{display:flex;align-items:center;gap:7px;font-size:14px;font-weight:600;transition:transform .15s,background .18s,border-color .18s}
+.exp .ctl button:active{transform:scale(.96)}
+.exp .ctl #play{color:var(--ink);background:var(--brass2);border:none;padding:11px 22px;border-radius:999px}
+.exp .ctl #play:hover{background:#c4a05c}
+.exp .ctl button:not(#play){color:var(--porc);background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.32);padding:11px 18px;border-radius:999px}
+.exp .ctl button:not(#play):hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.6)}
+.exp .ctl button svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.exp .ctl .step{font-family:var(--fm);font-size:13px;color:var(--porc);opacity:.85;margin-left:auto}
 
 /* feature grid */
 .feat{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
@@ -354,7 +359,7 @@ let elapsed=0;           // ms already elapsed in this chapter (for resume)
 let raf=null;            // animation frame id
 
 const track=document.getElementById('track');
-track.innerHTML=CH.map(()=>'<i><b></b></i>').join('');
+track.innerHTML=CH.map((_,i)=>'<i onclick="jump('+i+')"><b></b></i>').join('');
 const bars=[...track.children].map(li=>li.querySelector('b'));
 
 function setBars(){
