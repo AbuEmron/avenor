@@ -1,5 +1,5 @@
-/* AVENOR service worker — offline-first */
-const VERSION = 'avenor-v11';
+/* Keptly service worker — offline-first */
+const VERSION = 'keptly-v1';
 const SHELL = [
   '/',
   '/index.html',

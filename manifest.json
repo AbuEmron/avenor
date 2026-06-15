@@ -1,7 +1,7 @@
 {
   "id": "/",
-  "name": "AVENOR \u2014 Life Operating System",
-  "short_name": "AVENOR",
+  "name": "Keptly \u2014 Life Operating System",
+  "short_name": "Keptly",
   "description": "One place for your goals, projects, home, vehicles, documents, family and finances. Offline-first.",
   "start_url": "/app.html",
   "scope": "/",

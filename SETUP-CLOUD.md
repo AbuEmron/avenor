@@ -1,10 +1,10 @@
-# AVENOR — Cloud Setup: Supabase + Stripe (≈45 minutes)
+# Keptly — Cloud Setup: Supabase + Stripe (≈45 minutes)
 
 Do these in order. Nothing here requires writing code — everything is already in the package.
 
 ## Step 1 — Supabase (10 min)
 
-Create a new project at supabase.com (name it `avenor`, pick the region closest to NY — `us-east-1`). When it's ready, open **SQL Editor → New query**, paste the entire contents of `supabase-schema.sql`, and Run. You should see "Success" — that creates the profiles table, the user_state table, row-level security, and the auto-profile trigger.
+Create a new project at supabase.com (name it `keptly`, pick the region closest to NY — `us-east-1`). When it's ready, open **SQL Editor → New query**, paste the entire contents of `supabase-schema.sql`, and Run. You should see "Success" — that creates the profiles table, the user_state table, row-level security, and the auto-profile trigger.
 
 Then grab two values from **Project Settings → API**: the **Project URL** and the **anon public key**. Open `config.js` in your repo and paste them in. Commit. That alone enables sign-in.
 
@@ -12,7 +12,7 @@ One auth setting: go to **Authentication → Providers → Email** and confirm E
 
 ## Step 2 — Stripe products (10 min)
 
-In the Stripe Dashboard (start in **Test mode**), go to Product catalog → Add product: name it **AVENOR Premium**, add two recurring prices — **$6.00 monthly** and **$48.00 yearly**. Copy both price IDs (they look like `price_1Abc...`). The 14-day free trial is already coded into the checkout session, so don't configure a trial on the price itself.
+In the Stripe Dashboard (start in **Test mode**), go to Product catalog → Add product: name it **Keptly Premium**, add two recurring prices — **$6.00 monthly** and **$48.00 yearly**. Copy both price IDs (they look like `price_1Abc...`). The 14-day free trial is already coded into the checkout session, so don't configure a trial on the price itself.
 
 ## Step 3 — Vercel environment variables (10 min)
 
@@ -35,7 +35,7 @@ Push the repo (now containing `package.json` and the `api/` folder) — Vercel w
 
 ## Step 3b — AI document extraction (optional, 2 min)
 
-AVENOR's "Drop Anything" scan works offline with on-device OCR for everyone. Premium members additionally get far more accurate extraction via Claude. To enable it, add your `ANTHROPIC_API_KEY` (from console.anthropic.com — the same key pattern you used on Wireway) to the Vercel env vars above and redeploy. The endpoint at `/api/extract-document` verifies the user is signed in and Premium before spending any credits, so it can't be abused. If you skip this, the app still works — it just uses the on-device parser for everyone.
+Keptly's "Drop Anything" scan works offline with on-device OCR for everyone. Premium members additionally get far more accurate extraction via Claude. To enable it, add your `ANTHROPIC_API_KEY` (from console.anthropic.com — the same key pattern you used on Wireway) to the Vercel env vars above and redeploy. The endpoint at `/api/extract-document` verifies the user is signed in and Premium before spending any credits, so it can't be abused. If you skip this, the app still works — it just uses the on-device parser for everyone.
 
 ## Step 4 — Stripe webhook (5 min)
 

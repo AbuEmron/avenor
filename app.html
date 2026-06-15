@@ -4,20 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#11182A">
-<meta name="description" content="AVENOR — the operating system for your life. Goals, projects, home, vehicles, documents, family, and finances in one place.">
-<title>AVENOR — Life Operating System</title>
+<meta name="description" content="Keptly — the operating system for your life. Goals, projects, home, vehicles, documents, family, and finances in one place.">
+<title>Keptly — Life Operating System</title>
 <link rel="manifest" href="/manifest.json">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AVENOR">
+<meta name="apple-mobile-web-app-title" content="Keptly">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Hanken+Grotesk:wght@400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2311182A'/%3E%3Cpath d='M32 14 L48 50 H42.5 L32 25.5 L21.5 50 H16 Z' fill='%23F3F4F6'/%3E%3Crect x='25' y='38' width='14' height='2.6' rx='1.3' fill='%23B6924E'/%3E%3C/svg%3E">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2311182A'/%3E%3Cpath d='M18 14 H25 V30 L40 14 H49 L31 33 L49 50 H40 L25 34 V50 H18 Z' fill='%23F3F4F6'/%3E%3Crect x='25' y='38' width='14' height='2.6' rx='1.3' fill='%23B6924E'/%3E%3C/svg%3E">
 <style>
-/* ============ AVENOR DESIGN SYSTEM ============
+/* ============ Keptly DESIGN SYSTEM ============
    Palette   : Ink #11182A · Porcelain #F3F4F6 · Card #FFFFFF · Brass #A07E3B · Signal #B3261E · Verdant #2E7D5B
    Type      : Marcellus (display) · Hanken Grotesk (body) · Spline Sans Mono (figures)
    Spacing   : 4px base scale (4 8 12 16 20 24 32 40 56)
@@ -208,8 +208,8 @@ h1.page{font-family:var(--font-d);font-size:30px;line-height:1.15;font-weight:40
 </head>
 <body>
 <div class="splash" id="splash" aria-hidden="true">
-  <svg class="mark" width="72" height="72" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#11182A" stroke="rgba(255,255,255,.12)"/><path d="M32 14 L48 50 H42.5 L32 25.5 L21.5 50 H16 Z" fill="#F3F4F6"/><rect x="25" y="38" width="14" height="2.6" rx="1.3" fill="#B6924E"/></svg>
-  <span class="wm">AVENOR</span>
+  <svg class="mark" width="72" height="72" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#11182A" stroke="rgba(255,255,255,.12)"/><path d="M18 14 H25 V30 L40 14 H49 L31 33 L49 50 H40 L25 34 V50 H18 Z" fill="#F3F4F6"/><rect x="30" y="31" width="9" height="3" rx="1.5" transform="rotate(-40 34 33)" fill="#B6924E"/></svg>
+  <span class="wm">Keptly</span>
   <div class="bar"><i></i></div>
 </div>
 <div class="app">
@@ -217,8 +217,8 @@ h1.page{font-family:var(--font-d);font-size:30px;line-height:1.15;font-weight:40
   <main class="main">
     <div class="topbar">
       <div class="brandline">
-        <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#11182A"/><path d="M32 14 L48 50 H42.5 L32 25.5 L21.5 50 H16 Z" fill="#F3F4F6"/><rect x="25" y="38" width="14" height="2.6" rx="1.3" fill="#B6924E"/></svg>
-        <span class="wordmark">AVENOR</span>
+        <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#11182A"/><path d="M18 14 H25 V30 L40 14 H49 L31 33 L49 50 H40 L25 34 V50 H18 Z" fill="#F3F4F6"/><rect x="30" y="31" width="9" height="3" rx="1.5" transform="rotate(-40 34 33)" fill="#B6924E"/></svg>
+        <span class="wordmark">Keptly</span>
       </div>
       <div style="display:flex;gap:9px;align-items:center">
         <button class="sos" onclick="openEmergency()" aria-label="Open emergency mode"><span class="dot"></span>Emergency</button>
@@ -235,14 +235,14 @@ h1.page{font-family:var(--font-d);font-size:30px;line-height:1.15;font-weight:40
 <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 <div class="emg" id="emg" role="dialog" aria-modal="true"></div>
 <div class="toast" id="toast" role="status"></div>
-<script>window.AVENOR_CONFIG = window.AVENOR_CONFIG || { SUPABASE_URL:"", SUPABASE_ANON_KEY:"" };</script>
+<script>window.KEPTLY_CONFIG = window.KEPTLY_CONFIG || { SUPABASE_URL:"", SUPABASE_ANON_KEY:"" };</script>
 <script src="config.js" onerror="console.warn('config.js not found — running offline-only')"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="window.__noSupabase=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" onerror="window.__noOCR=1"></script>
 <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs" type="module" onerror="window.__noPDF=1"></script>
 <script>window.__pdfjsSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs';</script>
 <script>
-/* ================= AVENOR CORE =================
+/* ================= Keptly CORE =================
    Offline-first: local storage is the source of truth.
    Cloud sync attaches later behind the same save() call. */
 const store = (()=>{ // safe local persistence with in-memory fallback
@@ -268,12 +268,14 @@ const blank = ()=>({
   emergency:{medical:'',insurance:'',plan:''},
   activity:[]
 });
-let S = Object.assign(blank(), store.get('avenor')||{});
+let S = Object.assign(blank(), store.get('keptly') || store.get('avenor') || {});
+// one-time migration from the previous brand key
+if(!store.get('keptly') && store.get('avenor')){ store.set('keptly', S); }
 S.finance = Object.assign({bills:[],subs:[],debts:[],assets:[]}, S.finance||{});
 S.legacy = Object.assign({contacts:[],wishes:'',documents:'',assets:''}, S.legacy||{});
 if(!S.medical) S.medical=[];
 if(!S.insurance) S.insurance=[];
-function save(){ store.set('avenor',S); if(typeof schedulePush==='function') schedulePush(); }
+function save(){ store.set('keptly',S); if(typeof schedulePush==='function') schedulePush(); }
 function log(t){ S.activity.unshift({t, at:Date.now()}); S.activity=S.activity.slice(0,20); }
 function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2200); }
 
@@ -311,7 +313,7 @@ function renderNav(){
   const r = route().split('/')[0];
   document.getElementById('tabbar').innerHTML = NAV.map(n=>
     `<button class="tab ${r===n.id?'on':''}" onclick="go('${n.id}')" aria-label="${n.label}">${n.icon}${n.label}</button>`).join('');
-  document.getElementById('rail').innerHTML = `<span class="wordmark">AVENOR</span>` +
+  document.getElementById('rail').innerHTML = `<span class="wordmark">Keptly</span>` +
     RAIL.map(n=>`<button class="navbtn ${r===n.id?'on':''}" onclick="go('${n.id}')">${n.icon}${n.label}</button>`).join('') +
     `<div class="spacer"></div><button class="navbtn ${r==='settings'?'on':''}" onclick="go('settings')">${I.gear}Settings</button><button class="navbtn" onclick="openEmergency()" style="color:var(--signal)">${I.family}Emergency</button>`;
 }
@@ -344,7 +346,7 @@ function pulse(){
 
   const raw = BASE + factors.reduce((a,f)=>a+f.delta,0);
   const score = Math.max(8, Math.min(99, raw));
-  const notes = factors.length ? factors.slice(0,4).map(f=>`<b>${f.label.split(' ')[0]}</b> ${f.label.split(' ').slice(1).join(' ')}`) : ['Add goals, scan a document, or set a renewal to bring AVENOR to life.'];
+  const notes = factors.length ? factors.slice(0,4).map(f=>`<b>${f.label.split(' ')[0]}</b> ${f.label.split(' ').slice(1).join(' ')}`) : ['Add goals, scan a document, or set a renewal to bring Keptly to life.'];
   return {score, base:BASE, factors, notes};
 }
 
@@ -361,7 +363,7 @@ function sheetPulse(){
       ${p.factors.length?p.factors.map(row).join(''):'<div class="empty"><p>Nothing is affecting your score yet. Add goals and documents to see it respond.</p></div>'}
       <div class="row" style="background:var(--porcelain)"><div class="grow"><div class="title">Your Life Pulse</div><div class="meta">Capped between 8 and 99</div></div><span class="chip brass">${p.score}</span></div>
     </div>
-    <p class="meta" style="margin-top:12px;font-size:12.5px;color:var(--ink-3)">Life Pulse is a guide, not a judgment. It reflects only what you\u2019ve put into AVENOR.</p>
+    <p class="meta" style="margin-top:12px;font-size:12.5px;color:var(--ink-3)">Life Pulse is a guide, not a judgment. It reflects only what you\u2019ve put into Keptly.</p>
     <div class="actions"><button class="btn btn-ink" onclick="closeSheet()">Got it</button></div>`);
 }
 function renewalFeed(){
@@ -411,7 +413,7 @@ async function doUnlock(then){
     _vaultKey=await deriveKey(p);
     // verify against a stored check token (detects wrong passphrase)
     if(S.vaultCheck){ try{ await decryptBlob(S.vaultCheck); }catch(e){ _vaultKey=null; return toast('That passphrase doesn\u2019t match'); } }
-    else { S.vaultCheck=await encryptBlob('avenor-ok'); save(); }
+    else { S.vaultCheck=await encryptBlob('keptly-ok'); save(); }
     closeSheet(); toast('Vault unlocked'); if(then==='scan') startScan(); else if(then==='drop') dropAnything(); else render();
   }catch(e){ toast('Could not unlock'); }
 }
@@ -638,7 +640,7 @@ V.today = ()=>{
   </button>
 
   ${(totalSaved()||moneyAtRisk())?`<div class="section grid2">
-    ${totalSaved()?`<button class="stat" style="text-align:left;cursor:pointer" onclick="go('watch')"><div class="k">Saved with Avenor</div><div class="v" style="color:var(--verdant)">${fmtMoney(totalSaved())}</div></button>`:''}
+    ${totalSaved()?`<button class="stat" style="text-align:left;cursor:pointer" onclick="go('watch')"><div class="k">Saved with Keptly</div><div class="v" style="color:var(--verdant)">${fmtMoney(totalSaved())}</div></button>`:''}
     ${moneyAtRisk()?`<button class="stat" style="text-align:left;cursor:pointer" onclick="go('watch')"><div class="k">Bills due ≤30d</div><div class="v">${fmtMoney(moneyAtRisk())}</div></button>`:''}
   </div>`:''}
 
@@ -698,7 +700,7 @@ V.watch = ()=>{
   return `
   <span class="eyebrow">Watch</span>
   <h1 class="page">Nothing slips by.</h1>
-  <p class="sub">AVENOR watches your renewals, bills and warranties so a missed date never costs you.</p>
+  <p class="sub">Keptly watches your renewals, bills and warranties so a missed date never costs you.</p>
 
   <div class="section pulsecard" style="background:linear-gradient(135deg,#10301f,#11182A)">
     <span class="eyebrow" style="color:var(--brass-2)">Value delivered</span>
@@ -722,7 +724,7 @@ V.watch = ()=>{
 
   ${recent.length?`<div class="section"><span class="eyebrow">Recent wins</span>
     <div class="card rowlist" style="margin-top:12px">${recent.map(s=>`<div class="row"><div class="grow"><div class="title">${esc(s.why)}</div><div class="meta">${new Date(s.at).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div></div><span class="chip green">+${fmtMoney(s.amt)}</span></div>`).join('')}</div></div>`:
-    `<div class="section card pad"><p style="font-size:13.5px;color:var(--ink-2)">As you cancel unused subscriptions and stay ahead of renewals, your savings tally builds here — the proof AVENOR pays for itself.</p></div>`}`;
+    `<div class="section card pad"><p style="font-size:13.5px;color:var(--ink-2)">As you cancel unused subscriptions and stay ahead of renewals, your savings tally builds here — the proof Keptly pays for itself.</p></div>`}`;
 };
 
 function cancelSub(id){
@@ -847,7 +849,7 @@ V.vault = ()=>{
   <span class="eyebrow">Document Vault</span>
   <div class="hgroup"><h1 class="page">On record, on hand.</h1>
     ${vaultUnlocked()?`<button class="iconbtn" onclick="lockVault()" aria-label="Lock vault"><svg width="16" height="16" viewBox="0 0 24 24"><rect class="ico-stroke" x="5" y="11" width="14" height="9" rx="2"/><path class="ico-stroke" d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>`:''}</div>
-  <p class="sub">Scan a document and AVENOR reads the expiry date for you. Photos are encrypted on this device.</p>
+  <p class="sub">Scan a document and Keptly reads the expiry date for you. Photos are encrypted on this device.</p>
 
   <button class="btn btn-ink" style="width:100%;margin-top:16px" onclick="startScan()">
     <svg width="18" height="18" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M4 12h16"/></svg>
@@ -867,7 +869,7 @@ V.vault = ()=>{
       ${d.expires?`<span class="chip ${daysUntil(d.expires)<0?'red':daysUntil(d.expires)<=30?'brass':''}">${daysUntil(d.expires)<0?'expired':'to '+fmtDate(d.expires)}</span>`:''}
       ${d.scan?`<button class="iconbtn" onclick="viewScan('${d.id}')" aria-label="View scan"><svg width="16" height="16" viewBox="0 0 24 24"><path class="ico-stroke" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle class="ico-stroke" cx="12" cy="12" r="2.5"/></svg></button>`:''}
       <button class="iconbtn" onclick="sheetDoc('${d.id}')" aria-label="Edit"><svg width="16" height="16" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button>
-    </div>`).join(''):`<div class="empty"><div class="glyph">A</div><p>Scan your passport, insurance card or warranty. AVENOR fills in the details and tracks the expiry.</p></div>`}
+    </div>`).join(''):`<div class="empty"><div class="glyph">A</div><p>Scan your passport, insurance card or warranty. Keptly fills in the details and tracks the expiry.</p></div>`}
   </div>`}`;
 };
 
@@ -925,7 +927,7 @@ V.legacy = ()=>{
   ${field('documents','Key documents','Where your will, deeds, titles and important papers are kept.')}
 
   <div class="section card pad" style="background:var(--brass-tint);border-color:var(--brass)">
-    <p style="font-size:13.5px;color:var(--ink-2)">This is the most private part of AVENOR. It stays on your device (and your encrypted cloud, if synced). Share access deliberately, through the trusted contacts above.</p>
+    <p style="font-size:13.5px;color:var(--ink-2)">This is the most private part of Keptly. It stays on your device (and your encrypted cloud, if synced). Share access deliberately, through the trusted contacts above.</p>
   </div>`;
 };
 
@@ -1018,7 +1020,7 @@ V.settings = ()=>{
   const counts = S.goals.length+S.projects.length+S.home.length+S.vehicles.length+S.vault.length+S.family.length;
   return `
   <span class="eyebrow">Settings</span>
-  <h1 class="page">Your AVENOR.</h1>
+  <h1 class="page">Your Keptly.</h1>
   <p class="sub">${isPremium()?'Backed up to the cloud and synced across your devices.':'Everything lives on this device until you say otherwise.'}</p>
 
   ${accountCard()}
@@ -1054,8 +1056,8 @@ V.settings = ()=>{
   <div class="section">
     <span class="eyebrow">Explore</span>
     <div class="card rowlist" style="margin-top:12px">
-      <button class="row" style="width:100%;text-align:left" onclick="startTour()"><div class="grow"><div class="title">Take the guided tour</div><div class="meta">A 60-second walkthrough of every part of AVENOR</div></div><span class="chip">Start</span></button>
-      <button class="row" style="width:100%;text-align:left" onclick="if(confirm('Load a sample life to explore? This replaces what\'s on this device.'))loadSample()"><div class="grow"><div class="title">Load sample data</div><div class="meta">See AVENOR filled in with an example household</div></div><span class="chip brass">Demo</span></button>
+      <button class="row" style="width:100%;text-align:left" onclick="startTour()"><div class="grow"><div class="title">Take the guided tour</div><div class="meta">A 60-second walkthrough of every part of Keptly</div></div><span class="chip">Start</span></button>
+      <button class="row" style="width:100%;text-align:left" onclick="if(confirm('Load a sample life to explore? This replaces what\'s on this device.'))loadSample()"><div class="grow"><div class="title">Load sample data</div><div class="meta">See Keptly filled in with an example household</div></div><span class="chip brass">Demo</span></button>
     </div>
   </div>
 
@@ -1063,7 +1065,7 @@ V.settings = ()=>{
     <span class="eyebrow">About</span>
     <div class="card rowlist" style="margin-top:12px">
       <a class="row" href="privacy.html" style="text-decoration:none;color:inherit"><div class="grow"><div class="title">Privacy policy</div><div class="meta">Short version: your data never leaves this device</div></div><span class="chip">View</span></a>
-      <div class="row"><div class="grow"><div class="title">Version</div><div class="meta">AVENOR 2.0 — Insurance, Medical, Legacy</div></div></div>
+      <div class="row"><div class="grow"><div class="title">Version</div><div class="meta">Keptly 2.1 — rebrand</div></div></div>
     </div>
   </div>
 
@@ -1081,11 +1083,11 @@ function sheetProfile(){
 function saveProfile(){ S.profile.name=fval('pr_n'); save(); closeSheet(); render(); toast('Saved'); }
 
 function exportBackup(){
-  const payload = {app:'AVENOR', schema:1, exportedAt:new Date().toISOString(), data:S};
+  const payload = {app:'Keptly', schema:1, exportedAt:new Date().toISOString(), data:S};
   const blob = new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'avenor-backup-'+todayISO()+'.json';
+  a.download = 'keptly-backup-'+todayISO()+'.json';
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
   S.lastBackup = Date.now(); save(); render();
@@ -1097,19 +1099,19 @@ function restoreBackup(input){
   reader.onload = ()=>{
     try{
       const p = JSON.parse(reader.result);
-      const d = p && p.app==='AVENOR' && p.data ? p.data : p; // accept raw state too
+      const d = p && (p.app==='Keptly' || p.app==='AVENOR') && p.data ? p.data : p; // accept raw state too
       if(!d || typeof d!=='object' || !('goals' in d) || !('projects' in d)) throw new Error('shape');
       if(!confirm('Replace everything on this device with this backup? This cannot be undone.')){ input.value=''; return; }
       S = Object.assign(blank(), d);
       S.finance = Object.assign({bills:[],subs:[],debts:[],assets:[]}, S.finance||{});
       save(); render(); toast('Backup restored');
-    }catch(e){ toast('That file is not a valid AVENOR backup'); }
+    }catch(e){ toast('That file is not a valid Keptly backup'); }
     input.value='';
   };
   reader.readAsText(file);
 }
 function eraseAll(){
-  if(!confirm('Erase ALL AVENOR data on this device? Download a backup first if you want to keep anything.')) return;
+  if(!confirm('Erase ALL Keptly data on this device? Download a backup first if you want to keep anything.')) return;
   if(!confirm('Last check — this permanently deletes everything. Continue?')) return;
   S = blank(); save(); go('today'); render(); toast('Everything erased');
 }
@@ -1118,15 +1120,15 @@ function eraseAll(){
 let sb=null, sbSession=null, sbProfile=null, pushTimer=null, syncState='off'; // off|idle|syncing|synced|error
 
 function cloudConfigured(){
-  return !window.__noSupabase && typeof window.supabase!=='undefined' && window.AVENOR_CONFIG &&
-         AVENOR_CONFIG.SUPABASE_URL && AVENOR_CONFIG.SUPABASE_ANON_KEY;
+  return !window.__noSupabase && typeof window.supabase!=='undefined' && window.KEPTLY_CONFIG &&
+         KEPTLY_CONFIG.SUPABASE_URL && KEPTLY_CONFIG.SUPABASE_ANON_KEY;
 }
 function isPremium(){ return !!(sbProfile && (sbProfile.status==='active'||sbProfile.status==='trialing')); }
 function countItems(st){ return st.goals.length+st.projects.length+st.home.length+st.vehicles.length+st.vault.length+st.family.length+st.finance.bills.length+st.finance.subs.length+st.finance.debts.length+st.finance.assets.length; }
 
 async function cloudInit(){
   if(!cloudConfigured()) return;
-  sb = window.supabase.createClient(AVENOR_CONFIG.SUPABASE_URL, AVENOR_CONFIG.SUPABASE_ANON_KEY);
+  sb = window.supabase.createClient(KEPTLY_CONFIG.SUPABASE_URL, KEPTLY_CONFIG.SUPABASE_ANON_KEY);
   const { data:{ session } } = await sb.auth.getSession();
   sbSession = session;
   sb.auth.onAuthStateChange((_evt, s)=>{ const wasOut=!sbSession; sbSession=s; if(s && wasOut) afterLogin(); if(!s){ sbProfile=null; syncState='off'; render(); } });
@@ -1156,7 +1158,7 @@ async function firstSync(){
   }
   // Both sides have data → let the user decide once
   openSheet(`<h3>Two versions found</h3>
-    <p class="sub" style="margin:-6px 0 16px">This device and your cloud account both have AVENOR data. Which should win? The other is replaced.</p>
+    <p class="sub" style="margin:-6px 0 16px">This device and your cloud account both have Keptly data. Which should win? The other is replaced.</p>
     <div class="actions" style="flex-direction:column">
       <button class="btn btn-ink" onclick="resolveSync('local')">Keep this device (${countItems(S)} items) → upload</button>
       <button class="btn btn-ghost" onclick="resolveSync('cloud')">Keep cloud (last synced ${new Date(data.updated_at).toLocaleDateString()}) → download</button>
@@ -1191,7 +1193,7 @@ function syncLabel(){
 
 /* ---- auth (email code, no passwords) ---- */
 function sheetSignIn(){
-  openSheet(`<h3>Sign in to AVENOR</h3>
+  openSheet(`<h3>Sign in to Keptly</h3>
   <p class="sub" style="margin:-6px 0 16px">We email you a 6-digit code. No password to remember or lose.</p>
   ${FLD('si_e','Email','email','','you@example.com')}
   <div class="actions"><button class="btn btn-ink" onclick="sendCode()">Email me a code</button></div>`);
@@ -1257,7 +1259,7 @@ function accountCard(){
   if(!cloudConfigured()) return `<div class="section"><span class="eyebrow">Subscription</span>
     ${plans}
     <div class="card pad" style="margin-top:12px">
-      <p style="font-size:13.5px;color:var(--ink-2)">Sign-in and Premium subscriptions turn on once cloud sync is connected for this deployment. Most members save more than $6 in their first month by catching one renewal or unused subscription. Until then, AVENOR runs free and fully offline. Setup takes about 45 minutes — see <span class="mono">SETUP-CLOUD.md</span>.</p>
+      <p style="font-size:13.5px;color:var(--ink-2)">Sign-in and Premium subscriptions turn on once cloud sync is connected for this deployment. Most members save more than $6 in their first month by catching one renewal or unused subscription. Until then, Keptly runs free and fully offline. Setup takes about 45 minutes — see <span class="mono">SETUP-CLOUD.md</span>.</p>
     </div></div>`;
   if(!sbSession) return `<div class="section"><span class="eyebrow">Subscription</span>
     ${plans}
@@ -1267,7 +1269,7 @@ function accountCard(){
     </div></div>`;
   if(!sbSession) return `<div class="section"><span class="eyebrow">Account & Sync</span>
     <div class="card pad" style="margin-top:12px">
-      <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px"><b>AVENOR Premium</b> backs up your life record to the cloud and syncs it across every device — phone, tablet, desktop. 14-day free trial.</p>
+      <p style="font-size:14px;color:var(--ink-2);margin-bottom:14px"><b>Keptly Premium</b> backs up your life record to the cloud and syncs it across every device — phone, tablet, desktop. 14-day free trial.</p>
       <button class="btn btn-ink" style="width:100%" onclick="sheetSignIn()">Sign in / Create account</button>
     </div></div>`;
   if(!isPremium()) return `<div class="section"><span class="eyebrow">Account & Sync</span>
@@ -1553,7 +1555,7 @@ function openSearch(){
 }
 function renderSearch(q){
   const box=document.getElementById('qres'); if(!box) return;
-  if(!q){ box.innerHTML='<p class="sub" style="padding:14px 2px">Start typing to find anything across AVENOR.</p>'; return; }
+  if(!q){ box.innerHTML='<p class="sub" style="padding:14px 2px">Start typing to find anything across Keptly.</p>'; return; }
   const hits=searchIndex().filter(x=>(x.label+' '+x.sub).toLowerCase().includes(q)).slice(0,12);
   if(!hits.length){ box.innerHTML='<p class="sub" style="padding:14px 2px">Nothing matches \u201c'+esc(q)+'\u201d yet.</p>'; return; }
   box.innerHTML='<div class="card rowlist">'+hits.map(x=>
@@ -1702,7 +1704,7 @@ function render(){
 }
 function init(){
   if(!S.profile.name && !S.onboarded){
-    openSheet(`<h3 style="font-size:24px">Welcome to AVENOR</h3>
+    openSheet(`<h3 style="font-size:24px">Welcome to Keptly</h3>
     <p class="sub" style="margin:-6px 0 16px">The operating system for your whole life — goals, projects, home, vehicles, documents, family and money, in one calm place. It all stays on this device until you turn on sync.</p>
     ${FLD('w_n','What should we call you?','text','','First name')}
     <div class="actions" style="flex-direction:column">
