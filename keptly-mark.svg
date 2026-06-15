@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="512" height="512" role="img" aria-label="Keptly mark">
+  <g stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M21 14 V50" stroke="#16203A" stroke-width="9"/>
+    <path d="M23 29 L44 50" stroke="#16203A" stroke-width="9"/>
+    <path d="M23 30 L43 14" stroke="#C2954A" stroke-width="8.5"/>
+  </g>
+</svg>
