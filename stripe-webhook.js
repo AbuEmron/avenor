@@ -1,29 +1,51 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 
+export const config = { api: { bodyParser: false } };
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
+async function rawBody(req) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  return Buffer.concat(chunks);
+}
+
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  if (req.method !== 'POST') return res.status(405).end();
+
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(
+      await rawBody(req),
+      req.headers['stripe-signature'],
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (e) {
+    console.error('webhook signature failed', e.message);
+    return res.status(400).send('Invalid signature');
+  }
 
   try {
-    const token = (req.headers.authorization || '').replace('Bearer ', '');
-    const { data: { user }, error } = await admin.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: 'Sign in required' });
-
-    const { data: prof } = await admin.from('profiles')
-      .select('stripe_customer_id').eq('id', user.id).single();
-    if (!prof || !prof.stripe_customer_id) return res.status(400).json({ error: 'No billing account yet' });
-
-    const session = await stripe.billingPortal.sessions.create({
-      customer: prof.stripe_customer_id,
-      return_url: `${process.env.SITE_URL}/app.html#settings`
-    });
-
-    return res.status(200).json({ url: session.url });
+    if (event.type === 'customer.subscription.created' ||
+        event.type === 'customer.subscription.updated' ||
+        event.type === 'customer.subscription.deleted') {
+      const sub = event.data.object;
+      const status = event.type === 'customer.subscription.deleted' ? 'canceled' : sub.status;
+      const premium = status === 'active' || status === 'trialing';
+      await admin.from('profiles').update({
+        plan: premium ? 'premium' : 'free',
+        status,
+        current_period_end: sub.current_period_end
+          ? new Date(sub.current_period_end * 1000).toISOString() : null,
+        updated_at: new Date().toISOString()
+      }).eq('stripe_customer_id', sub.customer);
+    }
   } catch (e) {
-    console.error('portal error', e);
-    return res.status(500).json({ error: 'Could not open billing portal' });
+    console.error('webhook handling error', e);
+    return res.status(500).json({ error: 'Webhook handler failed' });
   }
+
+  return res.status(200).json({ received: true });
 }
