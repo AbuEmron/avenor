@@ -1,78 +1,33 @@
 {
-  "id": "/",
-  "name": "Keptly \u2014 Life Operating System",
+  "name": "Keptly — Life Organized",
   "short_name": "Keptly",
-  "description": "One place for your goals, projects, home, vehicles, documents, family and finances. Offline-first.",
-  "start_url": "/app.html",
+  "description": "Goals, projects, home, documents and finances — organized in one place.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#11182A",
-  "theme_color": "#11182A",
-  "lang": "en",
-  "dir": "ltr",
-  "categories": [
-    "productivity",
-    "lifestyle",
-    "finance"
-  ],
+  "background_color": "#02060F",
+  "theme_color": "#02060F",
+  "orientation": "portrait-primary",
   "icons": [
-    {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
+    { "src": "icons/icon-192.png",     "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png",     "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable.png","sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
+  "categories": ["lifestyle", "productivity"],
   "shortcuts": [
     {
-      "name": "Emergency Mode",
-      "short_name": "Emergency",
-      "url": "/app.html?emergency=1",
-      "icons": [
-        {
-          "src": "/icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "name": "Today",
+      "short_name": "Today",
+      "description": "Open Today dashboard",
+      "url": "/#today",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     },
     {
-      "name": "Projects",
-      "url": "/app.html#projects",
-      "icons": [
-        {
-          "src": "/icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    },
-    {
-      "name": "Vault",
-      "url": "/app.html#vault",
-      "icons": [
-        {
-          "src": "/icons/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "name": "Emergency",
+      "short_name": "SOS",
+      "description": "Open Emergency Mode",
+      "url": "/#emergency",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
     }
   ]
 }
