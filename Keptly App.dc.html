@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Hanken+Grotesk:wght@300;400;500;600;700&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js" onerror="window.__noSupabase=1"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" onerror="window.__noOCR=1"></script>
+<meta name="theme-color" content="#0E1525">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+:root{
+  --ink:#0E1525;--ink-2:#2D3A52;--ink-3:#64748B;
+  --pore:#F6F4EF;--card:#FFFFFF;--hair:#E8E5DF;--hair-2:#D4D0C8;
+  --brass:#9E7A2E;--brass-2:#C2954A;--brass-3:#D4A85C;--brass-tint:#F6EDD8;
+  --signal:#C0392B;--signal-tint:#FDF2F0;
+  --verdant:#1F7A52;--verdant-tint:#EDFAF4;
+  --sh-sm:0 1px 3px rgba(14,21,37,.04),0 1px 2px rgba(14,21,37,.03);
+  --sh-md:0 4px 16px rgba(14,21,37,.07),0 1px 3px rgba(14,21,37,.04);
+  --sh-lg:0 12px 40px rgba(14,21,37,.12),0 4px 12px rgba(14,21,37,.07);
+  --sh-brass:0 4px 24px rgba(194,149,74,.24);
+  --r-xs:8px;--r-sm:12px;--r-md:18px;--r-lg:26px;--r-xl:36px;
+  --font-d:'Marcellus',serif;--font-b:'Hanken Grotesk',system-ui,sans-serif;--font-m:'Spline Sans Mono',monospace;
+  --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{font-family:var(--font-b);background:var(--pore);color:var(--ink);font-size:16px;line-height:1.55;min-height:100dvh;overflow-x:hidden}
+button{font-family:inherit;font-size:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--brass-tint)}
+:focus-visible{outline:2px solid var(--brass-2);outline-offset:2px;border-radius:4px}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes rise-fast{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes pop{0%{transform:scale(.4)}55%{transform:scale(1.22)}100%{transform:scale(1)}}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 3px rgba(192,57,43,.2)}50%{box-shadow:0 0 0 6px rgba(192,57,43,.1)}}
+@keyframes splashrise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes splashload{from{transform:translateX(-60%)}to{transform:translateX(260%)}}
+@keyframes ob-in{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes emg-pulse{0%,100%{opacity:.7}50%{opacity:1}}
+
+/* Splash */
+.splash{position:fixed;inset:0;z-index:200;background:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;transition:opacity .5s ease,visibility .5s}
+.splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+.splash .mark{animation:splashrise .7s cubic-bezier(.22,1,.36,1) both}
+.splash .wm{font-family:var(--font-d);color:#F3F4F6;font-size:22px;letter-spacing:.44em;text-indent:.44em;animation:splashrise .7s .12s cubic-bezier(.22,1,.36,1) both}
+.splash .bar{width:96px;height:2px;border-radius:2px;background:rgba(255,255,255,.1);overflow:hidden;animation:splashrise .7s .22s both}
+.splash .bar i{display:block;height:100%;width:36%;background:var(--brass-2);animation:splashload 1.1s ease-in-out infinite alternate}
+
+/* Onboarding */
+#onboard{position:fixed;inset:0;z-index:100;background:var(--ink);flex-direction:column;align-items:center;justify-content:center;padding:max(var(--safe-t),48px) 28px max(var(--safe-b),48px)}
+.ob-step{display:none;width:100%;max-width:380px;flex-direction:column;align-items:center}
+.ob-step.active{display:flex;animation:ob-in .42s cubic-bezier(.22,1,.36,1) both}
+.ob-title{font-family:var(--font-d);font-size:clamp(28px,8vw,40px);color:#F3F4F6;text-align:center;line-height:1.12;margin-bottom:12px}
+.ob-sub{font-size:15.5px;color:rgba(255,255,255,.65);text-align:center;line-height:1.65;max-width:30ch;margin-bottom:32px}
+.ob-logo{margin-bottom:26px;animation:pop .7s cubic-bezier(.34,1.56,.64,1) both}
+.ob-btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:300px;padding:16px 28px;background:var(--brass-2);color:var(--ink);font-weight:700;font-size:16px;border-radius:999px;transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .18s;box-shadow:var(--sh-brass)}
+.ob-btn:active{transform:scale(.95)}
+.ob-btn.ghost{background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);box-shadow:none;margin-top:10px}
+.ob-btn.ghost:active{background:rgba(255,255,255,.18)}
+.ob-input{width:100%;max-width:300px;padding:16px 18px;background:rgba(255,255,255,.09);border:1.5px solid rgba(255,255,255,.18);border-radius:var(--r-md);color:#F3F4F6;font-size:18px;text-align:center;margin-bottom:24px;transition:border-color .2s,background .2s}
+.ob-input:focus{outline:none;border-color:var(--brass-2);background:rgba(255,255,255,.13)}
+.ob-input::placeholder{color:rgba(255,255,255,.32)}
+.ob-dots{display:flex;gap:8px;margin-bottom:28px}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);transition:all .3s}
+.ob-dot.on{background:var(--brass-2);width:22px;border-radius:4px}
+.ob-cards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;width:100%;max-width:340px;margin-bottom:28px}
+.ob-card{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);border-radius:var(--r-md);padding:18px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:all .22s cubic-bezier(.34,1.56,.64,1)}
+.ob-card:active{transform:scale(.94)}
+.ob-card.sel{background:rgba(194,149,74,.18);border-color:var(--brass-2)}
+.ob-card svg{width:26px;height:26px;color:rgba(255,255,255,.65)}
+.ob-card.sel svg{color:var(--brass-3)}
+.ob-card span{font-size:11.5px;font-weight:600;color:rgba(255,255,255,.65);letter-spacing:.04em}
+.ob-card.sel span{color:var(--brass-3)}
+.ob-check{width:80px;height:80px;border-radius:50%;background:var(--brass-2);display:flex;align-items:center;justify-content:center;margin-bottom:24px;animation:pop .65s .1s cubic-bezier(.34,1.56,.64,1) both;box-shadow:var(--sh-brass)}
+
+/* App shell */
+.app{max-width:1200px;margin:0 auto;display:flex;min-height:100dvh}
+.rail{display:none}
+.main{flex:1;min-width:0;padding:0 20px calc(96px + var(--safe-b));max-width:700px;margin:0 auto;width:100%}
+@media(min-width:900px){
+  .rail{display:flex;flex-direction:column;gap:3px;width:242px;padding:28px 14px;position:sticky;top:0;height:100dvh;border-right:1.5px solid var(--hair);overflow-y:auto;flex-shrink:0}
+  .main{padding:0 44px 60px;max-width:none}
+  .tabbar{display:none!important}
+}
+
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:18px 0 12px;position:sticky;top:0;background:linear-gradient(var(--pore) 82%,rgba(246,244,239,0));z-index:30}
+.brandline{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1;overflow:hidden}
+.topbar>div:last-child{flex-shrink:0;display:flex;align-items:center;gap:8px}
+.wordmark{font-family:var(--font-d);font-size:19px;letter-spacing:.36em;text-indent:.36em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media(max-width:430px){.wordmark{letter-spacing:.12em;text-indent:.12em;font-size:17px}}
+@media(min-width:900px){.topbar .brandline{visibility:hidden}}
+.sos{display:flex;align-items:center;gap:7px;background:var(--card);border:1.5px solid rgba(192,57,43,.18);border-radius:999px;padding:8px 15px 8px 11px;font-weight:700;font-size:13px;color:var(--signal);box-shadow:var(--sh-sm);transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.sos:active{transform:scale(.93)}
+.sos .dot{width:8px;height:8px;border-radius:50%;background:var(--signal);animation:pulse-dot 2s ease-in-out infinite}
+
+/* Rail nav */
+.rail .wordmark{font-size:17px;margin:2px 10px 22px}
+.navbtn{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:var(--r-sm);color:var(--ink-2);font-weight:500;font-size:14.5px;transition:background .18s,color .18s,transform .2s cubic-bezier(.34,1.56,.64,1)}
+.navbtn svg{width:19px;height:19px;flex:none}
+.navbtn:hover{background:#fff}
+.navbtn:active{transform:scale(.97)}
+.navbtn.on{background:var(--ink);color:#fff}
+.navbtn.on .ico-stroke{stroke:#fff}
+.rail .spacer{flex:1}
+
+/* Tab bar */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:40;display:flex;justify-content:space-around;background:rgba(250,248,244,.93);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid var(--hair);padding:8px 4px calc(8px + var(--safe-b))}
+.tab{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;font-weight:600;letter-spacing:.02em;color:var(--ink-3);padding:5px 10px;border-radius:14px;min-width:56px;transition:color .2s ease-out;position:relative}
+.tab svg{width:22px;height:22px;transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.tab.on{color:var(--ink)}
+.tab.on svg{transform:scale(1.12)}
+.tab.on::after{content:"";position:absolute;top:-1px;left:50%;transform:translateX(-50%);width:22px;height:3px;border-radius:3px;background:var(--brass-2);animation:rise-fast .3s cubic-bezier(.22,1,.36,1)}
+.ico-stroke{stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+
+/* Primitives */
+.eyebrow{font-family:var(--font-d);font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--brass);display:flex;align-items:center;gap:12px}
+.eyebrow::after{content:"";flex:1;height:1px;background:linear-gradient(to right,var(--hair-2),transparent)}
+h1.page{font-family:var(--font-d);font-size:clamp(28px,7vw,38px);line-height:1.1;font-weight:400;margin:8px 0 3px}
+.sub{color:var(--ink-3);font-size:14px}
+.section{margin-top:28px}
+.card{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);box-shadow:var(--sh-md)}
+.card.pad{padding:20px}
+.rowlist .row{display:flex;align-items:center;gap:14px;padding:15px 18px;border-bottom:1px solid var(--hair);transition:background .15s}
+.rowlist .row:last-child{border-bottom:none}
+.rowlist .row:active{background:var(--pore)}
+.row .grow{flex:1;min-width:0}
+.row .title{font-weight:600;font-size:15px;overflow-wrap:anywhere}
+.row .meta{font-size:13px;color:var(--ink-3);margin-top:2px}
+.mono{font-family:var(--font-m);font-size:13px}
+.chip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;background:var(--pore);color:var(--ink-2)}
+.chip.brass{background:var(--brass-tint);color:var(--brass)}
+.chip.green{background:var(--verdant-tint);color:var(--verdant)}
+.chip.red{background:var(--signal-tint);color:var(--signal)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:15px;border-radius:999px;padding:13px 24px;transition:transform .2s cubic-bezier(.34,1.56,.64,1),opacity .18s}
+.btn:active{transform:scale(.95)}
+.btn-ink{background:var(--ink);color:#fff}
+.btn-ink:hover{background:var(--ink-2)}
+.btn-ghost{border:1.5px solid var(--hair-2);background:var(--card)}
+.btn-ghost:hover{background:var(--pore)}
+.btn-quiet{color:var(--ink-3);font-size:13.5px;padding:8px 12px}
+.iconbtn{width:40px;height:40px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;border:1.5px solid var(--hair);background:var(--card);box-shadow:var(--sh-sm);transition:transform .2s cubic-bezier(.34,1.56,.64,1),background .15s;flex-shrink:0}
+.iconbtn:active{transform:scale(.86)}
+.iconbtn:hover{background:var(--pore)}
+.empty{padding:40px 24px;text-align:center;color:var(--ink-3)}
+.empty .glyph{font-family:var(--font-d);font-size:32px;color:var(--brass-2);margin-bottom:10px}
+.empty p{font-size:14.5px;max-width:300px;margin:0 auto 18px;line-height:1.65}
+.fab{position:fixed;right:20px;bottom:calc(88px + var(--safe-b));z-index:35;width:58px;height:58px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--sh-lg);transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.fab:active{transform:scale(.88)}
+@media(min-width:900px){.fab{bottom:36px;right:36px}}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:16px 18px;box-shadow:var(--sh-sm)}
+.stat .k{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
+.stat .v{font-family:var(--font-m);font-size:22px;font-weight:600;margin-top:5px}
+.progress{height:5px;border-radius:999px;background:var(--pore);overflow:hidden}
+.progress i{display:block;height:100%;border-radius:999px;background:var(--brass-2);transition:width .6s cubic-bezier(.22,1,.36,1)}
+
+/* Life Pulse */
+.pulsecard{background:var(--ink);color:#fff;border-radius:var(--r-lg);padding:24px 22px 20px;position:relative;overflow:hidden;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
+.pulsecard:active{transform:scale(.98)}
+.pulsecard::before{content:"";position:absolute;top:-30%;right:-5%;width:260px;height:260px;background:radial-gradient(circle,rgba(194,149,74,.28) 0%,transparent 68%);pointer-events:none}
+.pulsecard .eyebrow{color:var(--brass-2)}
+.pulsecard .eyebrow::after{background:rgba(255,255,255,.14)}
+.gaugewrap{display:flex;align-items:center;gap:24px;margin-top:16px}
+.gauge{width:122px;height:122px;flex:none;filter:drop-shadow(0 4px 16px rgba(194,149,74,.25))}
+.gauge-track{stroke:rgba(255,255,255,.1)}
+.gauge-arc{stroke-linecap:round}
+.gauge-num{font-family:var(--font-d);fill:#fff}
+.pulse-facts{display:flex;flex-direction:column;gap:8px;font-size:14px;color:rgba(255,255,255,.88)}
+.pulse-facts b{color:#fff;font-weight:600}
+
+/* Domain registry */
+.registry{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
+.domain{background:var(--card);border:1px solid var(--hair);border-radius:var(--r-md);padding:18px 16px 15px;display:flex;flex-direction:column;gap:8px;position:relative;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .2s;box-shadow:var(--sh-sm);text-align:left}
+.domain:active{transform:scale(.95)}
+.domain:hover{box-shadow:var(--sh-md)}
+.domain::before{content:"";position:absolute;top:0;left:16px;right:16px;height:2.5px;border-radius:2px;background:linear-gradient(to right,var(--brass-tint),transparent)}
+.domain .dname{font-family:var(--font-d);font-size:13.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.domain .dcount{font-size:12.5px;color:var(--ink-3)}
+.domain svg{width:20px;height:20px;color:var(--brass-2)}
+
+/* Task check */
+.check{width:26px;height:26px;border-radius:50%;border:2px solid var(--hair-2);flex:none;display:flex;align-items:center;justify-content:center;transition:all .22s cubic-bezier(.34,1.56,.64,1);cursor:pointer;background:transparent}
+.check:hover{border-color:var(--verdant);background:var(--verdant-tint)}
+.check.on{background:var(--verdant);border-color:var(--verdant);animation:pop .28s cubic-bezier(.34,1.56,.64,1)}
+.check svg{width:14px;height:14px;stroke:#fff;stroke-width:2.5;fill:none;stroke-linecap:round;stroke-linejoin:round;opacity:0;transform:scale(.4);transition:all .22s .04s cubic-bezier(.34,1.56,.64,1)}
+.check.on svg{opacity:1;transform:scale(1)}
+.done .title{text-decoration:line-through;color:var(--ink-3)}
+.backlink{display:inline-flex;align-items:center;gap:6px;color:var(--ink-3);font-size:13.5px;font-weight:600;padding:6px 0;margin-top:8px}
+.hgroup{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.netline{display:flex;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--hair);font-size:14.5px}
+.netline:last-child{border:none}
+.netline b{font-family:var(--font-m)}
+
+/* Sheets + Scrim */
+.scrim{position:fixed;inset:0;background:rgba(14,21,37,.44);backdrop-filter:blur(4px);z-index:60;opacity:0;transition:opacity .28s;pointer-events:none}
+.scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;background:var(--card);border-radius:var(--r-xl) var(--r-xl) 0 0;padding:14px 22px calc(28px + var(--safe-b));transform:translateY(108%);transition:transform .36s cubic-bezier(.22,1,.36,1);max-height:88dvh;overflow-y:auto;box-shadow:var(--sh-lg)}
+.sheet.show{transform:translateY(0)}
+@media(min-width:900px){.sheet{left:50%;right:auto;bottom:auto;top:50%;width:500px;max-height:82dvh;border-radius:var(--r-lg);transform:translate(-50%,-46%) scale(.97);opacity:0}.sheet.show{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.sheet .grab{width:38px;height:4px;border-radius:4px;background:var(--hair-2);margin:0 auto 16px}
+.sheet h3{font-family:var(--font-d);font-size:22px;font-weight:400;margin-bottom:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;padding:13px 16px;border:1.5px solid var(--hair-2);border-radius:var(--r-sm);background:var(--pore);font-size:16px;transition:border-color .18s,background .18s}
+.field textarea{min-height:80px;resize:vertical}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brass-2);background:#fff}
+.sheet .actions{display:flex;gap:10px;margin-top:20px}
+.sheet .actions .btn{flex:1}
+
+/* Emergency */
+.emg{position:fixed;inset:0;z-index:80;background:linear-gradient(165deg,#5C0A0A 0%,#1A0E0D 55%,#0A0507 100%);color:#fff;transform:translateY(105%);transition:transform .38s cubic-bezier(.22,1,.36,1);overflow-y:auto;padding:max(var(--safe-t),50px) 22px calc(34px + var(--safe-b))}
+.emg.show{transform:translateY(0)}
+.emg-911{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;background:rgba(255,60,60,.16);border:1.5px solid rgba(255,120,100,.35);border-radius:var(--r-md);margin-bottom:10px;text-decoration:none;color:#fff;cursor:pointer;transition:background .18s,transform .2s}
+.emg-911:active{transform:scale(.97);background:rgba(255,60,60,.25)}
+.emg-call{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:var(--r-sm);margin-bottom:8px;text-decoration:none;color:#fff;transition:background .18s,transform .2s}
+.emg-call:last-child{margin-bottom:0}
+.emg-call:active{transform:scale(.97);background:rgba(255,255,255,.13)}
+.emg-block{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.11);border-radius:var(--r-md);padding:18px;margin-bottom:14px}
+.emg-block h4{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,150,120,.9);margin-bottom:12px;font-weight:700}
+.emg-close{margin-top:8px;width:100%;padding:16px;border-radius:999px;background:#fff;color:#1A0E0D;font-weight:700;font-size:16px;border:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1)}
+.emg-close:active{transform:scale(.96)}
+.emg-edit{width:100%;padding:14px;border-radius:999px;margin-bottom:10px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.22);color:#fff;font-weight:600;font-size:14px;transition:background .18s}
+.emg-edit:active{background:rgba(255,255,255,.18)}
+
+/* Toast */
+.toast{position:fixed;left:50%;bottom:calc(108px + var(--safe-b));transform:translate(-50%,18px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;font-weight:600;opacity:0;transition:all .3s cubic-bezier(.22,1,.36,1);z-index:90;pointer-events:none;box-shadow:var(--sh-lg);white-space:nowrap;max-width:calc(100vw - 40px);overflow:hidden;text-overflow:ellipsis}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* View animation */
+.view{animation:rise-fast .34s cubic-bezier(.22,1,.36,1)}
+
+/* Tour */
+.tourwrap{position:fixed;inset:0;z-index:101}
+.tourcard{position:fixed;left:50%;bottom:calc(102px + var(--safe-b));transform:translateX(-50%);width:min(440px,calc(100% - 28px));background:var(--card);border-radius:var(--r-lg);padding:22px 24px;box-shadow:var(--sh-lg);z-index:102;animation:rise .3s cubic-bezier(.22,1,.36,1)}
+@media(min-width:900px){.tourcard{bottom:auto;top:50%;transform:translate(-50%,-50%)}}
+.tourcard h3{font-family:var(--font-d);font-size:22px;font-weight:400;margin:8px 0 8px}
+.tourcard p{font-size:14.5px;color:var(--ink-2);line-height:1.6}
+.tourdots{display:flex;gap:6px;margin:16px 0}
+.tourdots i{width:6px;height:6px;border-radius:50%;background:var(--hair-2)}
+.tourdots i.on{background:var(--brass-2);width:18px;border-radius:3px}
+.touract{display:flex;justify-content:space-between;align-items:center}
+</style>
+</helmet>
+
+<!-- Splash -->
+<div id="splash" class="splash" aria-hidden="true">
+  <svg class="mark" width="80" height="80" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#11182A" stroke="rgba(255,255,255,.1)"/><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M21 14 V50" stroke="#F3F4F6" stroke-width="9"/><path d="M23 29 L44 50" stroke="#F3F4F6" stroke-width="9"/><path d="M23 30 L43 14" stroke="#C2954A" stroke-width="8.5"/></g></svg>
+  <span class="wm">Keptly</span>
+  <div class="bar"><i></i></div>
+</div>
+
+<!-- Onboarding Overlay -->
+<div id="onboard" style="display:none">
+  <!-- Step 0: Welcome -->
+  <div class="ob-step active" id="ob-0">
+    <svg class="ob-logo" width="88" height="88" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#1a2235" stroke="rgba(255,255,255,.1)"/><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M21 14 V50" stroke="#F3F4F6" stroke-width="9"/><path d="M23 29 L44 50" stroke="#F3F4F6" stroke-width="9"/><path d="M23 30 L43 14" stroke="#C2954A" stroke-width="8.5"/></g></svg>
+    <p class="ob-title">Your whole life,<br>in one place.</p>
+    <p class="ob-sub">Goals, projects, home, documents and finances — organized by what you're trying to achieve. Offline-first.</p>
+    <button class="ob-btn" onclick="obNext()">Get started →</button>
+    <button class="ob-btn ghost" onclick="obSample()">Explore with sample data</button>
+  </div>
+  <!-- Step 1: Name -->
+  <div class="ob-step" id="ob-1">
+    <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div><div class="ob-dot"></div></div>
+    <p class="ob-title">What's your name?</p>
+    <p class="ob-sub" style="margin-bottom:20px">Your dashboard will greet you. You can change this anytime.</p>
+    <input class="ob-input" id="ob-name" type="text" placeholder="First name" autocomplete="given-name">
+    <button class="ob-btn" onclick="obNext()">Continue →</button>
+  </div>
+  <!-- Step 2: Pick area -->
+  <div class="ob-step" id="ob-2">
+    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div><div class="ob-dot"></div></div>
+    <p class="ob-title" style="margin-bottom:12px">Where do you<br>want to start?</p>
+    <div class="ob-cards">
+      <button class="ob-card" onclick="obSelect(this,'goals')">
+        <svg viewBox="0 0 24 24"><circle class="ico-stroke" cx="12" cy="12" r="8.5"/><circle class="ico-stroke" cx="12" cy="12" r="3.5"/></svg>
+        <span>Goals</span>
+      </button>
+      <button class="ob-card" onclick="obSelect(this,'projects')">
+        <svg viewBox="0 0 24 24"><path class="ico-stroke" d="M4 7h16v12H4zM9 7V5h6v2"/></svg>
+        <span>Projects</span>
+      </button>
+      <button class="ob-card" onclick="obSelect(this,'vault')">
+        <svg viewBox="0 0 24 24"><rect class="ico-stroke" x="4" y="5" width="16" height="14" rx="2"/><circle class="ico-stroke" cx="12" cy="12" r="3"/></svg>
+        <span>Vault</span>
+      </button>
+    </div>
+    <button class="ob-btn" onclick="obNext()">Take me in →</button>
+  </div>
+  <!-- Step 3: Ready -->
+  <div class="ob-step" id="ob-3">
+    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot on"></div></div>
+    <div class="ob-check">
+      <svg width="36" height="36" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <p class="ob-title">You're ready.</p>
+    <p class="ob-sub">Everything starts on your dashboard. Your data stays on this device — private by default.</p>
+    <button class="ob-btn" onclick="obFinish()">Open Keptly →</button>
+  </div>
+</div>
+
+<!-- App Shell -->
+<div class="app" id="appshell">
+  <nav class="rail" id="rail" aria-label="Primary"></nav>
+  <main class="main">
+    <div class="topbar">
+      <div class="brandline">
+        <svg width="26" height="26" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0E1525"/><g stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M21 14 V50" stroke="#F3F4F6" stroke-width="9"/><path d="M23 29 L44 50" stroke="#F3F4F6" stroke-width="9"/><path d="M23 30 L43 14" stroke="#C2954A" stroke-width="8.5"/></g></svg>
+        <span class="wordmark">Keptly</span>
+      </div>
+      <div>
+        <button class="sos" onclick="openEmergency()" aria-label="Emergency mode"><span class="dot"></span>Emergency</button>
+        <button class="iconbtn" onclick="openSearch()" aria-label="Search"><svg width="17" height="17" viewBox="0 0 24 24"><circle class="ico-stroke" cx="11" cy="11" r="7"/><path class="ico-stroke" d="M20 20l-3.5-3.5"/></svg></button>
+        <button class="iconbtn" onclick="go('settings')" aria-label="Settings"><svg width="17" height="17" viewBox="0 0 24 24"><circle class="ico-stroke" cx="12" cy="12" r="3"/><path class="ico-stroke" d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M5.9 5.9l1.6 1.6M16.5 16.5l1.6 1.6M18.1 5.9l-1.6 1.6M7.5 16.5l-1.6 1.6"/></svg></button>
+      </div>
+    </div>
+    <div id="view" class="view"></div>
+  </main>
+</div>
+
+<!-- Tab Bar -->
+<nav class="tabbar" id="tabbar" aria-label="Primary"></nav>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="fabAction()" aria-label="Add">
+  <svg width="22" height="22" viewBox="0 0 24 24"><path class="ico-stroke" d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2" stroke-linecap="round"/></svg>
+</button>
+
+<!-- Sheet + Scrim -->
+<div class="scrim" id="scrim" onclick="closeSheet()"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+
+<!-- Emergency Overlay -->
+<div class="emg" id="emg" role="dialog" aria-modal="true"></div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status"></div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+
+class Component extends DCLogic {
+  componentDidMount() {
+    window.KEPTLY_CONFIG = window.KEPTLY_CONFIG || { SUPABASE_URL: '', SUPABASE_ANON_KEY: '' };
+
+    // ---- STORE ----
+    const store = (() => {
+      let mem = {}, ok = false;
+      try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); ok = true; } catch(e) {}
+      return {
+        available: ok, lastError: null,
+        get(k) { try { return ok ? JSON.parse(localStorage.getItem(k)) : (mem[k] ?? null); } catch(e) { return null; } },
+        set(k, v) {
+          this.lastError = null;
+          try { if (ok) localStorage.setItem(k, JSON.stringify(v)); else mem[k] = v; return true; }
+          catch(e) { mem[k] = v; this.lastError = (e && e.name === 'QuotaExceededError') ? 'quota' : 'error'; return false; }
+        }
+      };
+    })();
+
+    const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+    const todayISO = () => new Date().toISOString().slice(0,10);
+    const fmtMoney = n => '$' + Number(n||0).toLocaleString(undefined,{maximumFractionDigits:0});
+    const fmtDate = d => d ? new Date(d+'T00:00:00').toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}) : '—';
+    const daysUntil = d => d ? Math.ceil((new Date(d+'T00:00:00') - new Date(todayISO()+'T00:00:00')) / 86400000) : null;
+    const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+    const blank = () => ({
+      profile:{name:''},goals:[],projects:[],home:[],vehicles:[],vault:[],
+      family:[],finance:{bills:[],subs:[],debts:[],assets:[]},
+      medical:[],insurance:[],legacy:{contacts:[],wishes:'',documents:'',assets:''},
+      emergency:{medical:'',insurance:'',plan:''},activity:[]
+    });
+
+    let S = Object.assign(blank(), store.get('keptly') || store.get('avenor') || {});
+    if (!store.get('keptly') && store.get('avenor')) store.set('keptly', S);
+    S.finance = Object.assign({bills:[],subs:[],debts:[],assets:[]}, S.finance||{});
+    S.legacy = Object.assign({contacts:[],wishes:'',documents:'',assets:''}, S.legacy||{});
+    if (!S.medical) S.medical = [];
+    if (!S.insurance) S.insurance = [];
+
+    function save() {
+      const ok = store.set('keptly', S);
+      if (!ok) { if (store.lastError==='quota') toast('Storage full — download a backup'); else toast('Could not save'); }
+      if (typeof schedulePush === 'function') schedulePush();
+    }
+    function log(t) { S.activity.unshift({t, at:Date.now()}); S.activity = S.activity.slice(0,20); }
+    function toast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 2400); }
+
+    // Icons
+    const I = {
+      today:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M3 11.5 12 4l9 7.5M5.5 10v9.5h13V10"/></svg>',
+      goals:'<svg viewBox="0 0 24 24"><circle class="ico-stroke" cx="12" cy="12" r="8.5"/><circle class="ico-stroke" cx="12" cy="12" r="3.5"/></svg>',
+      projects:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M4 7h16v12H4zM9 7V5h6v2"/></svg>',
+      vault:'<svg viewBox="0 0 24 24"><rect class="ico-stroke" x="4" y="5" width="16" height="14" rx="2"/><circle class="ico-stroke" cx="12" cy="12" r="3"/><path class="ico-stroke" d="M12 12h2.2"/></svg>',
+      home:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M4 21V8l8-5 8 5v13M9 21v-6h6v6"/></svg>',
+      car:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M5 16l1.2-5.2A2 2 0 0 1 8.1 9.2h7.8a2 2 0 0 1 1.9 1.6L19 16M4 16h16v3h-2.5M4 19h2.5"/><circle class="ico-stroke" cx="8" cy="18" r="1.4"/><circle class="ico-stroke" cx="16" cy="18" r="1.4"/></svg>',
+      family:'<svg viewBox="0 0 24 24"><circle class="ico-stroke" cx="9" cy="8" r="3"/><circle class="ico-stroke" cx="16.5" cy="10" r="2.2"/><path class="ico-stroke" d="M4 19c0-2.8 2.2-5 5-5s5 2.2 5 5M14.5 15.4c2 .3 3.5 1.8 3.5 3.6"/></svg>',
+      med:'<svg viewBox="0 0 24 24"><rect class="ico-stroke" x="4" y="6" width="16" height="14" rx="2"/><path class="ico-stroke" d="M9 6V4h6v2M12 10v6M9 13h6"/></svg>',
+      ins:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M12 3C7 3 3 6 3 11a9 9 0 0 0 9 9 9 9 0 0 0 9-9c0-5-4-8-9-8z"/></svg>',
+      legacy:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M4 5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path class="ico-stroke" d="M12 8.5c-1-1.6-3.6-1-3.6 1 0 1.4 2.2 2.8 3.6 3.8 1.4-1 3.6-2.4 3.6-3.8 0-2-2.6-2.6-3.6-1z"/></svg>',
+      watch:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path class="ico-stroke" d="M9 12l2 2 4-4"/></svg>',
+      gear:'<svg viewBox="0 0 24 24"><circle class="ico-stroke" cx="12" cy="12" r="3"/><path class="ico-stroke" d="M12 3.5v2.2M12 18.3v2.2M3.5 12h2.2M18.3 12h2.2M5.9 5.9l1.6 1.6M16.5 16.5l1.6 1.6M18.1 5.9l-1.6 1.6M7.5 16.5l-1.6 1.6"/></svg>',
+      finance:'<svg viewBox="0 0 24 24"><path class="ico-stroke" d="M4 18V6m0 12h16M7.5 14v-3m4.5 3V8m4.5 6v-5"/></svg>',
+    };
+
+    const NAV = [
+      {id:'today',label:'Today',icon:I.today},{id:'watch',label:'Watch',icon:I.watch},
+      {id:'projects',label:'Projects',icon:I.projects},{id:'vault',label:'Vault',icon:I.vault},{id:'finance',label:'Finance',icon:I.finance}
+    ];
+    const RAIL = [NAV[0],NAV[1],{id:'goals',label:'Goals',icon:I.goals},NAV[2],NAV[3],NAV[4],
+      {id:'home',label:'Home',icon:I.home},{id:'vehicles',label:'Vehicles',icon:I.car},
+      {id:'insurance',label:'Insurance',icon:I.ins},{id:'medical',label:'Medical',icon:I.med},
+      {id:'family',label:'Family',icon:I.family},{id:'legacy',label:'Legacy',icon:I.legacy}];
+
+    function route() { return location.hash.replace('#','') || 'today'; }
+    function go(r) { location.hash = r; }
+    window.addEventListener('hashchange', render);
+
+    function renderNav() {
+      const r = route().split('/')[0];
+      document.getElementById('tabbar').innerHTML = NAV.map(n =>
+        `<button class="tab ${r===n.id?'on':''}" onclick="go('${n.id}')" aria-label="${n.label}">${n.icon}${n.label}</button>`).join('');
+      document.getElementById('rail').innerHTML = `<span class="wordmark">Keptly</span>` +
+        RAIL.map(n => `<button class="navbtn ${r===n.id?'on':''}" onclick="go('${n.id}')">${n.icon}${n.label}</button>`).join('') +
+        `<div class="spacer"></div>
+        <button class="navbtn ${r==='settings'?'on':''}" onclick="go('settings')">${I.gear}Settings</button>
+        <button class="navbtn" onclick="openEmergency()" style="color:var(--signal)">${I.family}Emergency</button>`;
+    }
+
+    // ---- LIFE PULSE ----
+    function pulse() {
+      const BASE = 72, factors = [];
+      const allTasks = S.projects.flatMap(p => p.tasks||[]);
+      const overdue = allTasks.filter(t => !t.done && t.due && daysUntil(t.due)<0).length;
+      if (overdue) factors.push({label:`${overdue} overdue task${overdue>1?'s':''}`,delta:-Math.min(20,overdue*4),hint:'Catch up or reschedule',goto:'projects'});
+      const renewals = renewalFeed().filter(r => r.days!==null && r.days<=14).length;
+      if (renewals) factors.push({label:`${renewals} renewal${renewals>1?'s':''} due soon`,delta:-Math.min(15,renewals*5),hint:'Handle in Watch',goto:'watch'});
+      const expired = S.vault.filter(d => d.expires && daysUntil(d.expires)<0).length;
+      if (expired) factors.push({label:`${expired} expired document${expired>1?'s':''}`,delta:-Math.min(12,expired*4),hint:'Renew in your Vault',goto:'vault'});
+      const activeGoals = S.goals.length;
+      if (activeGoals) factors.push({label:`${activeGoals} active goal${activeGoals>1?'s':''}`,delta:Math.min(15,activeGoals*3),hint:'Direction set',goto:'goals'});
+      const doneToday = allTasks.filter(t => t.done && t.doneAt && (Date.now()-t.doneAt)<86400000).length;
+      if (doneToday) factors.push({label:`${doneToday} completed today`,delta:Math.min(10,doneToday*2),hint:'Momentum counts',goto:'projects'});
+      const scans = S.vault.filter(d => d.scan).length;
+      if (scans) factors.push({label:`${scans} document${scans>1?'s':''} secured`,delta:Math.min(8,scans*2),hint:'Encrypted in your Vault',goto:'vault'});
+      if (S.lastBackup && (Date.now()-S.lastBackup)<30*86400000) factors.push({label:'Recent backup on file',delta:5,hint:'Your data is protected',goto:'settings'});
+      const score = Math.max(8, Math.min(99, BASE + factors.reduce((a,f)=>a+f.delta,0)));
+      const notes = factors.length ? factors.slice(0,4).map(f=>`<b>${f.label.split(' ')[0]}</b> ${f.label.split(' ').slice(1).join(' ')}`) : ['Add goals, scan a document, or set a renewal to bring Keptly to life.'];
+      return {score, base:BASE, factors, notes};
+    }
+
+    function animateGauge(score) {
+      const arc = document.querySelector('.gauge-arc');
+      const numEl = document.querySelector('.gauge-num');
+      if (!arc || !numEl) return;
+      const C = 2 * Math.PI * 46;
+      let start = null;
+      const dur = 1300;
+      function step(ts) {
+        if (!start) start = ts;
+        const p = Math.min((ts - start) / dur, 1);
+        const e = 1 - Math.pow(1 - p, 3);
+        arc.style.strokeDashoffset = C * (1 - e * score / 100);
+        numEl.textContent = Math.round(e * score);
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function sheetPulse() {
+      const p = pulse();
+      const band = p.score>=80?'Strong':p.score>=60?'Steady':p.score>=40?'Needs attention':'At risk';
+      const row = f => `<button class="row" style="width:100%;text-align:left" onclick="closeSheet();go('${f.goto}')">
+        <div class="grow"><div class="title">${esc(f.label)}</div><div class="meta">${esc(f.hint)}</div></div>
+        <span class="chip ${f.delta<0?'red':'green'}">${f.delta>0?'+':''}${f.delta}</span></button>`;
+      openSheet(`<h3>Life Pulse: ${p.score}</h3>
+        <p class="sub" style="margin:-6px 0 14px">${band}. Here's exactly what shapes your score.</p>
+        <div class="card rowlist">
+          <div class="row"><div class="grow"><div class="title">Starting balance</div><div class="meta">Everyone starts here</div></div><span class="chip">${p.base}</span></div>
+          ${p.factors.length?p.factors.map(row).join(''):'<div class="empty" style="padding:20px"><p>Add goals and documents to see your score respond.</p></div>'}
+          <div class="row" style="background:var(--pore)"><div class="grow"><div class="title">Your Life Pulse</div><div class="meta">Capped 8–99</div></div><span class="chip brass">${p.score}</span></div>
+        </div>
+        <div class="actions"><button class="btn btn-ink" onclick="closeSheet()">Got it</button></div>`);
+    }
+
+    function renewalFeed() {
+      const out = [];
+      S.home.forEach(h => { if(h.nextDue) out.push({label:h.item+' — service',date:h.nextDue,days:daysUntil(h.nextDue),goto:'home'}); if(h.warrantyUntil) out.push({label:h.item+' — warranty',date:h.warrantyUntil,days:daysUntil(h.warrantyUntil),goto:'home'}); });
+      S.vehicles.forEach(v => { if(v.insurance) out.push({label:v.name+' — insurance',date:v.insurance,days:daysUntil(v.insurance),goto:'vehicles'}); if(v.registration) out.push({label:v.name+' — registration',date:v.registration,days:daysUntil(v.registration),goto:'vehicles'}); });
+      S.vault.forEach(d => { if(d.expires) out.push({label:d.title+' — expires',date:d.expires,days:daysUntil(d.expires),goto:'vault'}); });
+      (S.insurance||[]).forEach(p => { if(p.renews) out.push({label:p.name+' — insurance',date:p.renews,days:daysUntil(p.renews),goto:'insurance'}); });
+      return out.filter(r => r.days!==null).sort((a,b) => a.days-b.days);
+    }
+
+    // ---- VAULT ----
+    let _vaultKey = null;
+    const vaultUnlocked = () => !!_vaultKey;
+    async function deriveKey(pass) {
+      const enc = new TextEncoder();
+      const salt = S.vaultSalt || (S.vaultSalt = Array.from(crypto.getRandomValues(new Uint8Array(16))));
+      const base = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+      return crypto.subtle.deriveKey({name:'PBKDF2',salt:new Uint8Array(salt),iterations:150000,hash:'SHA-256'}, base, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']);
+    }
+    async function encryptBlob(dataURL) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const ct = await crypto.subtle.encrypt({name:'AES-GCM',iv}, _vaultKey, new TextEncoder().encode(dataURL));
+      return {iv:Array.from(iv), ct:btoa(String.fromCharCode(...new Uint8Array(ct)))};
+    }
+    async function decryptBlob(rec) {
+      const ct = Uint8Array.from(atob(rec.ct), c => c.charCodeAt(0));
+      const pt = await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(rec.iv)}, _vaultKey, ct);
+      return new TextDecoder().decode(pt);
+    }
+    function sheetUnlock(then) {
+      const first = !S.vaultSalt;
+      openSheet(`<h3>${first?'Set a vault passphrase':'Unlock your vault'}</h3>
+        <p class="sub" style="margin:-6px 0 16px">${first?'Your documents are encrypted on this device. The passphrase is never sent anywhere.':'Enter your vault passphrase to view encrypted documents.'}</p>
+        ${FLD('vk','Passphrase','password','','')}
+        <div class="actions"><button class="btn btn-ink" onclick="doUnlock(${then?`'${then}'`:'null'})">${first?'Create vault':'Unlock'}</button></div>`);
+      setTimeout(() => document.getElementById('vk')?.focus(), 120);
+    }
+    async function doUnlock(then) {
+      const p = fval('vk'); if (p.length<4) return toast('Use at least 4 characters');
+      try {
+        _vaultKey = await deriveKey(p);
+        if (S.vaultCheck) { try { await decryptBlob(S.vaultCheck); } catch(e) { _vaultKey=null; return toast('Wrong passphrase'); } }
+        else { S.vaultCheck = await encryptBlob('keptly-ok'); save(); }
+        closeSheet(); toast('Vault unlocked');
+        if (then==='scan') startScan(); else if (then==='drop') dropAnything(); else render();
+      } catch(e) { toast('Could not unlock'); }
+    }
+    function lockVault() { _vaultKey = null; toast('Vault locked'); render(); }
+    function startScan() { pickDoc(true); }
+    function dropAnything() { pickDoc(false); }
+    function pickDoc(camera) {
+      if (!vaultUnlocked()) return sheetUnlock(camera?'scan':'drop');
+      const inp = document.createElement('input'); inp.type='file';
+      inp.accept = camera ? 'image/*' : 'image/*,application/pdf';
+      if (camera) inp.capture = 'environment';
+      inp.onchange = () => { const f=inp.files&&inp.files[0]; if(f) routeIntake(f); };
+      inp.click();
+    }
+    async function routeIntake(file) {
+      if (file.type==='application/pdf'||/\.pdf$/i.test(file.name)) return processPDF(file);
+      return processScan(file);
+    }
+    async function aiEnhance(text, parsed) {
+      if (!sbSession||!isPremium()||!text||text.trim().length<10) return parsed;
+      try {
+        const r = await fetch('/api/extract-document',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sbSession.access_token},body:JSON.stringify({text:text.slice(0,6000)})});
+        if (!r.ok) return parsed;
+        const j = await r.json();
+        if (!j.ok) return parsed;
+        return {title:j.title||parsed.title||'',category:j.category||parsed.category||'Other',ref:j.ref||parsed.ref||'',expires:j.expires||parsed.expires||'',provider:j.provider||'',confidence:j.confidence,ai:true};
+      } catch(e) { return parsed; }
+    }
+    async function loadPdfLib() {
+      if (window.__noPDF) return null;
+      if (window.pdfjsLib) return window.pdfjsLib;
+      try {
+        const mod = await import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs');
+        mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+        window.pdfjsLib = mod; return mod;
+      } catch(e) { window.__noPDF=1; return null; }
+    }
+    async function processPDF(file) {
+      openSheet(`<h3>Reading your PDF…</h3><div class="card pad" style="text-align:center;padding:30px"><p class="sub" id="ocrstat">Opening…</p><div class="progress" style="margin-top:14px"><i id="ocrbar" style="width:10%"></i></div></div>`);
+      const stat=document.getElementById('ocrstat'), bar=document.getElementById('ocrbar');
+      const lib = await loadPdfLib();
+      let text='', dataURL=null, parsed={ref:'',expires:'',category:'Other'};
+      try {
+        const buf = await file.arrayBuffer();
+        if (lib) {
+          const pdf = await lib.getDocument({data:buf}).promise;
+          if (bar) bar.style.width='30%';
+          for (let i=1; i<=Math.min(pdf.numPages,3); i++) { const pg=await pdf.getPage(i); const tc=await pg.getTextContent(); text+=' '+tc.items.map(it=>it.str).join(' '); }
+          const pg=await pdf.getPage(1); const vp=pg.getViewport({scale:1.4});
+          const c=document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+          await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+          dataURL=c.toDataURL('image/jpeg',0.7);
+          if (bar) bar.style.width='65%';
+          if (text.trim().length<20&&!window.__noOCR&&window.Tesseract) {
+            if (stat) stat.textContent='Reading text…';
+            const r=await Tesseract.recognize(dataURL,'eng',{logger:m=>{if(m.status==='recognizing text'&&bar)bar.style.width=(65+m.progress*30)+'%';}});
+            text=r.data.text||'';
+          }
+        }
+        parsed=parseDoc(text||''); parsed=await aiEnhance(text||'',parsed);
+      } catch(e) { toast('Could not read that PDF'); }
+      let enc=null; try { if(dataURL) enc=await encryptBlob(dataURL); } catch(e) {}
+      closeSheet(); sheetDoc(null,{scan:enc,ocr:(text||'').slice(0,4000),pdf:true,...parsed});
+    }
+    function compress(file, max=1400) {
+      return new Promise(res => {
+        const img=new Image(), rd=new FileReader();
+        rd.onload=()=>{img.onload=()=>{let{width:w,height:h}=img;const s=Math.min(1,max/Math.max(w,h));w*=s;h*=s;const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);res(c.toDataURL('image/jpeg',0.7));};img.src=rd.result;};
+        rd.readAsDataURL(file);
+      });
+    }
+    function parseDoc(text) {
+      const out={ref:'',expires:''}, months={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11}, found=[];
+      (text.match(/\b(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{2,4})\b/g)||[]).forEach(m=>{const p=m.split(/[\/\-\.]/).map(Number);let y=p[2];if(y<100)y+=2000;let mo=p[0]-1,da=p[1];if(mo>11){mo=p[1]-1;da=p[0];}const d=new Date(y,mo,da);if(!isNaN(d))found.push(d);});
+      const today=new Date(), future=found.filter(d=>d>today).sort((a,b)=>a-b);
+      const pick=future[0]||found.sort((a,b)=>b-a)[0];
+      if(pick) out.expires=pick.toISOString().slice(0,10);
+      const ref=(text.match(/(?:policy|member|account)\s*(?:no\.?|number|#)?\s*[:#]?\s*([A-Z0-9]{2,}(?:-[A-Z0-9]+)*)/i)||text.match(/(?:passport|license|id)\s*(?:no\.?|#)?\s*[:#]?\s*([A-Z0-9]{5,})/i));
+      if(ref) out.ref=ref[1].trim().replace(/\s+/g,'');
+      const t=text.toLowerCase();
+      out.category=/passport|driver|licen[cs]e|identity|birth/.test(t)?'Identity':/insur|policy|coverage/.test(t)?'Insurance':/warrant/.test(t)?'Warranties':/lease|agreement|contract/.test(t)?'Contracts':/receipt|invoice/.test(t)?'Receipts':/patient|medical|prescription/.test(t)?'Medical':'Other';
+      return out;
+    }
+    async function processScan(file) {
+      openSheet(`<h3>Reading your document…</h3><div class="card pad" style="text-align:center;padding:30px"><p class="sub" id="ocrstat">Compressing…</p><div class="progress" style="margin-top:14px"><i id="ocrbar" style="width:8%"></i></div></div>`);
+      const dataURL=await compress(file);
+      let parsed={ref:'',expires:'',category:'Other'}, text='';
+      const stat=document.getElementById('ocrstat'), bar=document.getElementById('ocrbar');
+      if (!window.__noOCR&&window.Tesseract) {
+        try { if(stat) stat.textContent='Recognizing text…'; const r=await Tesseract.recognize(dataURL,'eng',{logger:m=>{if(m.status==='recognizing text'&&bar)bar.style.width=(15+m.progress*80)+'%';}}); text=r.data.text||''; parsed=parseDoc(text); } catch(e) {}
+      }
+      parsed=await aiEnhance(text,parsed);
+      let enc=null; try { enc=await encryptBlob(dataURL); } catch(e) {}
+      closeSheet(); sheetDoc(null,{scan:enc,ocr:text.slice(0,4000),...parsed});
+    }
+
+    // ---- VALUE ENGINE ----
+    function ensureValue() { if(!S.saves) S.saves=[]; }
+    function totalSaved() { ensureValue(); return S.saves.reduce((a,s)=>a+Number(s.amt||0),0); }
+    function recordSave(amt,why) { ensureValue(); if(!amt) return; S.saves.unshift({amt:Number(amt),why,at:Date.now()}); S.saves=S.saves.slice(0,100); log('Saved '+fmtMoney(amt)+' — '+why); }
+    function subAnnual(s) { return s.cycle==='Yearly'?Number(s.amount||0):Number(s.amount||0)*12; }
+    function radar() {
+      const out=[], add=(label,date,goto,stake,kind)=>{const d=daysUntil(date);if(d===null)return;out.push({label,date,days:d,goto,stake:stake||0,kind});};
+      S.home.forEach(x=>{if(x.nextDue)add(x.item+' — service',x.nextDue,'home',0,'maintenance');if(x.warrantyUntil)add(x.item+' — warranty',x.warrantyUntil,'home',0,'warranty');});
+      S.vehicles.forEach(v=>{if(v.insurance)add(v.name+' — insurance',v.insurance,'vehicles',0,'insurance');if(v.registration)add(v.name+' — registration',v.registration,'vehicles',0,'registration');});
+      (S.insurance||[]).forEach(p=>{if(p.renews)add(p.name+' — insurance renews',p.renews,'insurance',0,'insurance');});
+      S.vault.forEach(d=>{if(d.expires)add(d.title+' — expires',d.expires,'vault',0,'document');});
+      S.finance.bills.forEach(b=>{if(b.dueDay){const d=new Date();let due=new Date(d.getFullYear(),d.getMonth(),Math.min(28,+b.dueDay||1));if(due<d)due=new Date(d.getFullYear(),d.getMonth()+1,Math.min(28,+b.dueDay||1));add(b.name+' — bill due',due.toISOString().slice(0,10),'finance',Number(b.amount||0),'bill');}});
+      S.finance.subs.forEach(s=>{out.push({label:s.name+' — still using it?',date:null,days:9999,goto:'finance',stake:subAnnual(s),kind:'sub',sub:s});});
+      return out.sort((a,b)=>a.days-b.days);
+    }
+    function moneyAtRisk() { return radar().filter(r=>r.days<=30&&r.kind==='bill').reduce((a,r)=>a+r.stake,0); }
+
+    // ---- VIEWS ----
+    const V = {};
+    const HORIZONS = ['5 years','3 years','1 year','90 days','30 days'];
+
+    V.today = () => {
+      const p=pulse(), C=2*Math.PI*46;
+      const tasks=S.projects.flatMap(pr=>(pr.tasks||[]).map(t=>({...t,project:pr.title,pid:pr.id}))).filter(t=>!t.done&&(!t.due||daysUntil(t.due)<=7)).sort((a,b)=>(a.due||'9999')<(b.due||'9999')?-1:1).slice(0,6);
+      const ren=renewalFeed().filter(r=>r.days<=45).slice(0,4);
+      const hour=new Date().getHours();
+      const greet=hour<12?'Good morning':hour<18?'Good afternoon':'Good evening';
+      return `
+      <div style="margin-bottom:4px">
+        <span class="eyebrow">Life Dashboard</span>
+        <h1 class="page" style="margin-top:10px">${greet}${S.profile.name?', '+esc(S.profile.name):''}.</h1>
+        <p class="sub" style="font-family:var(--font-m);font-size:12px;letter-spacing:.04em">${new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'})}</p>
+      </div>
+
+      <button class="section pulsecard" onclick="sheetPulse()" style="display:block;width:100%;text-align:left" aria-label="View Life Pulse breakdown">
+        <span class="eyebrow" style="display:flex;justify-content:space-between;align-items:center">Life Pulse
+          <span style="font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--brass-2);text-transform:none;font-family:var(--font-b);display:inline-flex;align-items:center;gap:3px">How it's scored <svg width="11" height="11" viewBox="0 0 24 24" style="stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M9 6l6 6-6 6"/></svg></span>
+        </span>
+        <div class="gaugewrap">
+          <svg class="gauge" viewBox="0 0 120 120" role="img" aria-label="Life pulse ${p.score}">
+            <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#9E7A2E"/><stop offset="100%" stop-color="#D4A85C"/></linearGradient></defs>
+            <circle class="gauge-track" cx="60" cy="60" r="46" fill="none" stroke-width="5.5"/>
+            <circle class="gauge-arc" cx="60" cy="60" r="46" fill="none" stroke="url(#bg)" stroke-width="5.5" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" transform="rotate(-90 60 60)"/>
+            <text class="gauge-num" x="60" y="67" text-anchor="middle" font-size="29">0</text>
+            <text x="60" y="81" text-anchor="middle" font-size="9" fill="rgba(255,255,255,.55)" style="font-family:Hanken Grotesk,sans-serif">pulse</text>
+          </svg>
+          <div class="pulse-facts">${p.notes.map(n=>`<span>${n}</span>`).join('')}</div>
+        </div>
+      </button>
+
+      ${(totalSaved()||moneyAtRisk())?`<div class="section grid2">
+        ${totalSaved()?`<button class="stat" style="text-align:left;cursor:pointer" onclick="go('watch')"><div class="k">Saved with Keptly</div><div class="v" style="color:var(--verdant)">${fmtMoney(totalSaved())}</div></button>`:''}
+        ${moneyAtRisk()?`<button class="stat" style="text-align:left;cursor:pointer" onclick="go('watch')"><div class="k">Bills due ≤30d</div><div class="v">${fmtMoney(moneyAtRisk())}</div></button>`:''}
+      </div>`:''}
+
+      <div class="section">
+        <span class="eyebrow">Up Next</span>
+        <div class="card rowlist" style="margin-top:12px">
+          ${tasks.length?tasks.map(t=>taskRow(t,t.pid)).join(''):`<div class="empty"><div class="glyph">→</div><p>Open a project and set your next moves — they appear here automatically.</p><button class="btn btn-ink" onclick="go('projects')">Go to projects</button></div>`}
+        </div>
+      </div>
+
+      ${ren.length?`<div class="section"><span class="eyebrow">Renewals & Deadlines</span>
+        <div class="card rowlist" style="margin-top:12px">${ren.map(r=>`<button class="row" style="width:100%;text-align:left" onclick="go('${r.goto}')">
+          <div class="grow"><div class="title">${esc(r.label)}</div><div class="meta">${fmtDate(r.date)}</div></div>
+          <span class="chip ${r.days<0?'red':r.days<=14?'brass':''}">${r.days<0?Math.abs(r.days)+'d overdue':r.days===0?'today':'in '+r.days+'d'}</span>
+        </button>`).join('')}</div></div>`:''}
+
+      <div class="section">
+        <span class="eyebrow">Your Life, Organized</span>
+        <div class="registry">
+          ${dom('goals',I.goals,'Goals',S.goals.length+' active')}
+          ${dom('projects',I.projects,'Projects',S.projects.length+' running')}
+          ${dom('home',I.home,'Home',S.home.length+' tracked')}
+          ${dom('vehicles',I.car,'Vehicles',S.vehicles.length+' in garage')}
+          ${dom('vault',I.vault,'Vault',S.vault.length+' documents')}
+          ${dom('family',I.family,'Family',S.family.length+' people')}
+          ${dom('insurance',I.ins,'Insurance',(S.insurance||[]).length+' policies')}
+          ${dom('medical',I.med,'Medical',(S.medical||[]).length+' entries')}
+          ${dom('legacy',I.legacy,'Legacy',(S.legacy?.contacts?.length||0)+' trusted')}
+        </div>
+      </div>`;
+    };
+
+    const dom=(r,ic,n,c)=>`<button class="domain" onclick="go('${r}')">${ic}<span class="dname">${n}</span><span class="dcount">${c}</span></button>`;
+
+    V.watch = () => {
+      ensureValue();
+      const items=radar(), urgent=items.filter(r=>r.kind!=='sub'&&r.days<=30), soon=items.filter(r=>r.kind!=='sub'&&r.days>30&&r.days<=90), subs=items.filter(r=>r.kind==='sub');
+      const atRisk=moneyAtRisk(), saved=totalSaved(), recent=(S.saves||[]).slice(0,5);
+      const card=r=>`<button class="row" style="width:100%;text-align:left" onclick="go('${r.goto}')">
+        <div class="grow"><div class="title">${esc(r.label)}</div><div class="meta">${r.date?fmtDate(r.date):''}${r.stake?(r.date?' · ':'')+fmtMoney(r.stake)+(r.kind==='sub'?'/yr':''):''}</div></div>
+        ${r.kind==='sub'?`<button class="chip brass" style="border:none;cursor:pointer" onclick="event.stopPropagation();cancelSub('${r.sub.id}')">Cancelled?</button>`:`<span class="chip ${r.days<0?'red':r.days<=14?'brass':''}">${r.days<0?Math.abs(r.days)+'d late':r.days===0?'today':'in '+r.days+'d'}</span>`}
+      </button>`;
+      return `
+      <span class="eyebrow">Watch</span>
+      <h1 class="page">Nothing slips by.</h1>
+      <p class="sub">Renewals, bills and warranties — watched so you never miss a date.</p>
+      <div class="section" style="background:linear-gradient(145deg,#0F2D1C,#0E1525);border-radius:var(--r-lg);padding:24px 22px;color:#fff;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-30%;right:-10%;width:200px;height:200px;background:radial-gradient(circle,rgba(31,122,82,.4),transparent 65%);pointer-events:none"></div>
+        <span class="eyebrow" style="color:rgba(100,230,160,.8)">Value delivered<span style="flex:1;height:1px;background:rgba(255,255,255,.12);margin-left:12px;display:inline-block"></span></span>
+        <div style="display:flex;align-items:flex-end;gap:16px;margin-top:12px">
+          <div style="font-family:var(--font-d);font-size:clamp(36px,10vw,52px);line-height:1;color:#fff">${fmtMoney(saved)}</div>
+          <div style="color:rgba(255,255,255,.7);font-size:13.5px;padding-bottom:5px">saved or protected</div>
+        </div>
+        ${atRisk?`<p style="color:rgba(255,255,255,.8);font-size:13px;margin-top:12px"><b style="color:#fff">${fmtMoney(atRisk)}</b> in bills due within 30 days — tracked.</p>`:''}
+      </div>
+      ${urgent.length?`<div class="section"><span class="eyebrow">Next 30 days</span><div class="card rowlist" style="margin-top:12px">${urgent.map(card).join('')}</div></div>`:`<div class="section card empty"><div class="glyph">✓</div><p>Nothing due in the next 30 days. Add a bill or scan a document to start tracking.</p><button class="btn btn-ink" onclick="go('vault')">Scan a document</button></div>`}
+      ${subs.length?`<div class="section"><span class="eyebrow">Subscription check · ${fmtMoney(subs.reduce((a,s)=>a+s.stake,0))}/yr</span><p class="sub" style="margin:6px 0 0;font-size:13px">Tap one you've cancelled to log the savings.</p><div class="card rowlist" style="margin-top:12px">${subs.map(card).join('')}</div></div>`:''}
+      ${soon.length?`<div class="section"><span class="eyebrow">On the horizon · 31–90 days</span><div class="card rowlist" style="margin-top:12px">${soon.map(card).join('')}</div></div>`:''}
+      ${recent.length?`<div class="section"><span class="eyebrow">Recent wins</span><div class="card rowlist" style="margin-top:12px">${recent.map(s=>`<div class="row"><div class="grow"><div class="title">${esc(s.why)}</div><div class="meta">${new Date(s.at).toLocaleDateString(undefined,{month:'short',day:'numeric'})}</div></div><span class="chip green">+${fmtMoney(s.amt)}</span></div>`).join('')}</div></div>`:''}`;
+    };
+
+    function cancelSub(id) {
+      const s=S.finance.subs.find(x=>x.id===id); if(!s) return;
+      if(!confirm('Mark "'+s.name+'" as cancelled and log '+fmtMoney(subAnnual(s))+'/yr saved?')) return;
+      S.finance.subs=S.finance.subs.filter(x=>x.id!==id); recordSave(subAnnual(s),'Cancelled '+s.name);
+      save(); render(); toast('Nice — '+fmtMoney(subAnnual(s))+'/yr back in your pocket');
+    }
+
+    V.goals = () => `
+      <span class="eyebrow">Goals</span>
+      <div class="hgroup"><h1 class="page">The long game.</h1></div>
+      <p class="sub">From a five-year vision down to the next 30 days.</p>
+      ${HORIZONS.map(h=>{const gs=S.goals.filter(g=>g.horizon===h);if(!gs.length)return'';return`<div class="section"><span class="eyebrow">${h}</span><div class="card rowlist" style="margin-top:12px">${gs.map(g=>{const linked=S.projects.filter(p=>p.goalId===g.id).length;return`<div class="row"><div class="grow"><div class="title">${esc(g.title)}</div><div class="meta">${linked?linked+' linked project'+(linked>1?'s':'')+(g.target?' · ':''):''}${g.target?fmtDate(g.target):''}</div><div class="progress" style="margin-top:8px"><i style="width:${g.progress||0}%"></i></div></div><button class="iconbtn" onclick="event.stopPropagation();sheetGoal('${g.id}')" aria-label="Edit"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button></div>`;}).join('')}</div></div>`;}).join('')||`<div class="card empty section"><div class="glyph">◎</div><p>A life without written goals drifts. Set your first horizon.</p><button class="btn btn-ink" onclick="sheetGoal()">Set a goal</button></div>`}`;
+
+    V.projects = () => {
+      const r=route().split('/'); if(r[1]) return projectDetail(r[1]);
+      return `<span class="eyebrow">Projects</span><h1 class="page">Things in motion.</h1><p class="sub">Every project carries its own tasks, budget and notes.</p>
+      <div class="section card rowlist">${S.projects.length?S.projects.map(p=>{const ts=p.tasks||[],done=ts.filter(t=>t.done).length,g=S.goals.find(g=>g.id===p.goalId);return`<button class="row" style="width:100%;text-align:left" onclick="go('projects/${p.id}')"><div class="grow"><div class="title">${esc(p.title)}</div><div class="meta">${done}/${ts.length} tasks${g?' · serves "'+esc(g.title)+'"':''}${p.budget?' · '+fmtMoney(p.spent||0)+' of '+fmtMoney(p.budget):''}</div><div class="progress" style="margin-top:8px"><i style="width:${ts.length?Math.round(done/ts.length*100):0}%"></i></div></div><span class="chip ${p.status==='Done'?'green':p.status==='On hold'?'':'brass'}">${p.status||'Active'}</span></button>`;}).join(''):`<div class="empty"><div class="glyph">◻</div><p>Turn goals into motion. Start your first project.</p><button class="btn btn-ink" onclick="sheetProject()">Start a project</button></div>`}</div>`;
+    };
+
+    function taskRow(t, pid) {
+      return `<div class="row ${t.done?'done':''}" id="tr-${t.id}">
+        <button class="check ${t.done?'on':''}" onclick="toggleTask('${pid}','${t.id}')" aria-label="Toggle task"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></button>
+        <div class="grow"><div class="title">${esc(t.title)}</div><div class="meta">${t.project?esc(t.project):''}${t.due?(t.project?' · ':'')+'due '+fmtDate(t.due):''}</div></div>
+        ${t.due&&!t.done&&daysUntil(t.due)<0?'<span class="chip red">overdue</span>':''}
+      </div>`;
+    }
+
+    function toggleTask(pid, tid) {
+      const p=S.projects.find(p=>p.id===pid); if(!p) return;
+      const t=(p.tasks||[]).find(t=>t.id===tid); if(!t) return;
+      t.done=!t.done; t.doneAt=t.done?Date.now():null;
+      if(t.done) log('Completed "'+t.title+'"');
+      save();
+      const row=document.getElementById('tr-'+tid);
+      if (row) {
+        const check=row.querySelector('.check');
+        if(check){check.classList.toggle('on',t.done);}
+        if(t.done){row.classList.add('done');setTimeout(()=>render(),400);}else{row.classList.remove('done');render();}
+      } else render();
+    }
+
+    function projectDetail(id) {
+      const p=S.projects.find(p=>p.id===id);
+      if(!p) return`<button class="backlink" onclick="go('projects')">‹ All projects</button><div class="card empty section"><p>This project no longer exists.</p><button class="btn btn-ink" onclick="go('projects')">Back</button></div>`;
+      const ts=p.tasks||[],done=ts.filter(t=>t.done).length,g=S.goals.find(g=>g.id===p.goalId);
+      return `<button class="backlink" onclick="go('projects')">‹ All projects</button>
+      <span class="eyebrow">Project</span>
+      <div class="hgroup"><h1 class="page">${esc(p.title)}</h1><button class="iconbtn" onclick="sheetProject('${p.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button></div>
+      <p class="sub">${g?'Serves "'+esc(g.title)+'" · ':''}${p.status||'Active'}</p>
+      ${p.budget?`<div class="grid2 section"><div class="stat"><div class="k">Budget</div><div class="v">${fmtMoney(p.budget)}</div></div><div class="stat"><div class="k">Spent</div><div class="v" style="color:${(p.spent||0)>p.budget?'var(--signal)':'inherit'}">${fmtMoney(p.spent||0)}</div></div></div>`:''}
+      <div class="section"><div class="hgroup"><span class="eyebrow" style="flex:1">Tasks · ${done}/${ts.length}</span></div>
+        <div class="card rowlist" style="margin-top:12px">${ts.length?ts.map(t=>taskRow(t,p.id)).join(''):`<div class="empty"><p>No tasks yet. Break this down into next moves.</p></div>`}</div>
+        <button class="btn btn-ghost" style="margin-top:12px;width:100%" onclick="sheetTask('${p.id}')">+ Add task</button>
+      </div>
+      ${p.notes?`<div class="section"><span class="eyebrow">Notes</span><div class="card pad" style="margin-top:12px;white-space:pre-wrap;font-size:14.5px;line-height:1.65">${esc(p.notes)}</div></div>`:''}`;
+    }
+
+    V.home = () => listModule({eyebrow:'Home Management',title:'The household ledger.',sub:'Maintenance, appliances, warranties and utilities.',items:S.home,sheet:'sheetHome',empty:'Track the furnace filter, the roof, the water heater. Your house stops surprising you.',row:h=>`<div class="grow"><div class="title">${esc(h.item)}</div><div class="meta">${esc(h.category||'General')}${h.lastService?' · last '+fmtDate(h.lastService):''}${h.warrantyUntil?' · warranty to '+fmtDate(h.warrantyUntil):''}</div></div>${h.nextDue?`<span class="chip ${daysUntil(h.nextDue)<0?'red':daysUntil(h.nextDue)<=14?'brass':''}">${daysUntil(h.nextDue)<0?'overdue':'due '+fmtDate(h.nextDue)}</span>`:''}<button class="iconbtn" onclick="sheetHome('${h.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button>`});
+    V.vehicles = () => listModule({eyebrow:'Vehicle Management',title:'The garage.',sub:'Service history, insurance, registration and running costs.',items:S.vehicles,sheet:'sheetVehicle',empty:'Track service intervals, renewals and what it really costs to run.',row:v=>{const cost=(v.services||[]).reduce((a,s)=>a+Number(s.cost||0),0);return`<div class="grow"><div class="title">${esc(v.name)}</div><div class="meta mono">${v.odometer?Number(v.odometer).toLocaleString()+' mi':''}${cost?' · '+fmtMoney(cost)+' lifetime':''}</div><div class="meta">${v.insurance?'Ins '+fmtDate(v.insurance):''}${v.registration?' · Reg '+fmtDate(v.registration):''}</div></div><button class="iconbtn" onclick="sheetService('${v.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M12 5v14M5 12h14"/></svg></button><button class="iconbtn" onclick="sheetVehicle('${v.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button>`;}});
+
+    const VAULT_CATS=['Identity','Insurance','Contracts','Receipts','Warranties','Medical','Property','Other'];
+    V.vault = () => {
+      const locked=S.vaultSalt&&!vaultUnlocked();
+      return `<span class="eyebrow">Document Vault</span>
+      <div class="hgroup"><h1 class="page">On record, on hand.</h1>${vaultUnlocked()?`<button class="iconbtn" onclick="lockVault()"><svg width="15" height="15" viewBox="0 0 24 24"><rect class="ico-stroke" x="5" y="11" width="14" height="9" rx="2"/><path class="ico-stroke" d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></button>`:''}</div>
+      <p class="sub">Scan a document — Keptly reads the expiry date automatically. Photos are encrypted on this device.</p>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:16px">
+        <button class="btn btn-ink" style="width:100%" onclick="startScan()"><svg width="17" height="17" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2M4 12h16"/></svg>Scan a document</button>
+        <button class="btn btn-ghost" style="width:100%" onclick="dropAnything()"><svg width="16" height="16" viewBox="0 0 24 24"><path class="ico-stroke" d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>Drop a PDF or screenshot</button>
+        <button class="btn-quiet" style="width:100%;text-align:center" onclick="sheetDoc()">Add details manually</button>
+      </div>
+      ${locked?`<div class="section card empty"><div class="glyph">🔒</div><p>Your vault is locked. Unlock to view encrypted documents.</p><button class="btn btn-ink" onclick="sheetUnlock()">Unlock vault</button></div>`:`<div class="section card rowlist">${S.vault.length?S.vault.map(d=>`<div class="row"><div class="grow"><div class="title">${esc(d.title)}${d.scan?' <span class="chip" style="vertical-align:middle;font-size:9px">scan</span>':''}</div><div class="meta">${esc(d.category)}${d.ref?' · ':''}<span class="mono">${esc(d.ref||'')}</span></div></div>${d.expires?`<span class="chip ${daysUntil(d.expires)<0?'red':daysUntil(d.expires)<=30?'brass':''}">${daysUntil(d.expires)<0?'expired':'to '+fmtDate(d.expires)}</span>`:''}<div style="display:flex;gap:6px">${d.scan?`<button class="iconbtn" onclick="viewScan('${d.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle class="ico-stroke" cx="12" cy="12" r="2.5"/></svg></button>`:''}<button class="iconbtn" onclick="sheetDoc('${d.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button></div></div>`).join(''):`<div class="empty"><div class="glyph">◻</div><p>Scan your passport, insurance card or warranty. Keptly fills in the details and tracks the expiry.</p></div>`}</div>`}`;
+    };
+
+    V.family = () => listModule({eyebrow:'Family Hub',title:'Your people.',sub:'Contacts, medical notes and who to call when it matters.',items:S.family,sheet:'sheetPerson',empty:'Add household members and emergency contacts. They appear in Emergency Mode.',row:f=>`<div class="grow"><div class="title">${esc(f.name)}</div><div class="meta">${esc(f.relation||'')}${f.phone?' · ':''}<span class="mono">${esc(f.phone||'')}</span>${f.medical?' · '+esc(f.medical):''}</div></div>${f.emergency?'<span class="chip red">ICE</span>':''}<button class="iconbtn" onclick="sheetPerson('${f.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button>`});
+    V.insurance = () => listModule({eyebrow:'Insurance',title:'Covered, and proof of it.',sub:'Every policy, its number, and when it renews.',items:S.insurance||[],sheet:'sheetInsurance',empty:'Add health, auto, home, or life policies. Renewal dates flow into Watch.',row:p=>`<div class="grow"><div class="title">${esc(p.name)}</div><div class="meta">${esc(p.type||'Policy')}${p.provider?' · '+esc(p.provider):''}${p.policy?' · ':''}<span class="mono">${esc(p.policy||'')}</span></div></div>${p.renews?`<span class="chip ${daysUntil(p.renews)<0?'red':daysUntil(p.renews)<=30?'brass':''}">${daysUntil(p.renews)<0?'lapsed':'renews '+fmtDate(p.renews)}</span>`:''}<button class="iconbtn" onclick="sheetInsurance('${p.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button>`});
+    V.medical = () => listModule({eyebrow:'Medical',title:'Health, on the record.',sub:'Conditions, medications, allergies and providers.',items:S.medical||[],sheet:'sheetMedical',empty:'Add medications, allergies or conditions. Critical entries appear in Emergency Mode.',row:m=>`<div class="grow"><div class="title">${esc(m.label)}${m.critical?' <span class="chip red" style="vertical-align:middle">critical</span>':''}</div><div class="meta">${esc(m.type||'')}${m.detail?' · '+esc(m.detail):''}${m.person?' · '+esc(m.person):''}</div></div><button class="iconbtn" onclick="sheetMedical('${m.id}')"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button>`});
+
+    V.legacy = () => {
+      const L=S.legacy;
+      const field=(k,label,hint)=>`<div class="section"><span class="eyebrow">${label}</span><button class="card pad" style="width:100%;text-align:left;margin-top:12px;cursor:pointer" onclick="sheetLegacyText('${k}','${label}')">${L[k]?`<p style="font-size:14.5px;white-space:pre-wrap;color:var(--ink-2);line-height:1.65">${esc(L[k])}</p>`:`<p class="sub" style="margin:0">${hint}</p>`}</button></div>`;
+      return `<span class="eyebrow">Digital Legacy</span><h1 class="page">If something happens.</h1><p class="sub">The hardest thing to leave your family is clarity. Prepare it here, ahead of time.</p>
+      <div class="section"><span class="eyebrow">Trusted contacts</span><div class="card rowlist" style="margin-top:12px">
+        ${L.contacts.length?L.contacts.map(c=>`<div class="row"><div class="grow"><div class="title">${esc(c.name)}</div><div class="meta">${esc(c.relation||'')}${c.phone?' · ':''}<span class="mono">${esc(c.phone||'')}</span></div></div><button class="iconbtn" onclick="delLegacyContact('${c.id}')"><svg width="14" height="14" viewBox="0 0 24 24"><path class="ico-stroke" d="M6 7h12M9 7V5h6v2M8 7l1 12h6l1-12"/></svg></button></div>`).join(''):'<div class="empty" style="padding:22px"><p>No trusted contacts yet.</p></div>'}
+        <button class="row" style="width:100%;text-align:left;color:var(--brass)" onclick="sheetLegacyContact()"><div class="grow"><div class="title" style="color:var(--brass)">+ Add trusted contact</div></div></button>
+      </div></div>
+      ${field('wishes','Wishes & instructions','Funeral preferences, messages, account guidance.')}
+      ${field('assets','Where things are','Accounts, property, insurance — where to find them.')}
+      ${field('documents','Key documents','Where your will, deeds and titles are kept.')}
+      <div class="section card pad" style="background:var(--brass-tint);border-color:rgba(162,126,59,.4)"><p style="font-size:13.5px;color:var(--ink-2)">This is the most private part of Keptly. It stays on your device. Share access deliberately, through the trusted contacts above.</p></div>`;
+    };
+
+    V.finance = () => {
+      const F=S.finance;
+      const monthly=F.bills.reduce((a,b)=>a+Number(b.amount||0),0)+F.subs.reduce((a,s)=>a+(s.cycle==='Yearly'?Number(s.amount||0)/12:Number(s.amount||0)),0);
+      const debt=F.debts.reduce((a,d)=>a+Number(d.balance||0),0), assets=F.assets.reduce((a,x)=>a+Number(x.value||0),0);
+      const sec=(name,items,row,addFn)=>`<div class="section"><div class="hgroup"><span class="eyebrow" style="flex:1">${name}</span><button class="btn-quiet" onclick="${addFn}()">+ Add</button></div>${items.length?`<div class="card rowlist" style="margin-top:10px">${items.map(row).join('')}</div>`:''}</div>`;
+      return `<span class="eyebrow">Finance Center</span><h1 class="page">Know your numbers.</h1><p class="sub">Bills, subscriptions, debts and assets. No bank login required.</p>
+      <div class="grid2 section">
+        <div class="stat"><div class="k">Monthly fixed</div><div class="v">${fmtMoney(monthly)}</div></div>
+        <div class="stat"><div class="k">Net position</div><div class="v" style="color:${assets-debt<0?'var(--signal)':'var(--verdant)'}">${fmtMoney(assets-debt)}</div></div>
+      </div>
+      ${sec('Bills',F.bills,b=>`<div class="netline"><span>${esc(b.name)}<span style="display:block;font-size:12px;color:var(--ink-3)">day ${esc(b.dueDay||'—')}${b.autopay?' · autopay':''}</span></span><b>${fmtMoney(b.amount)}</b></div>`,'sheetBill')}
+      ${sec('Subscriptions',F.subs,s=>`<div class="netline"><span>${esc(s.name)}<span style="display:block;font-size:12px;color:var(--ink-3)">${esc(s.cycle||'Monthly')}</span></span><b>${fmtMoney(s.amount)}</b></div>`,'sheetSub')}
+      ${sec('Debts',F.debts,d=>`<div class="netline"><span>${esc(d.name)}<span style="display:block;font-size:12px;color:var(--ink-3)">${d.rate?esc(d.rate)+'% APR':''}</span></span><b style="color:var(--signal)">${fmtMoney(d.balance)}</b></div>`,'sheetDebt')}
+      ${sec('Assets',F.assets,a=>`<div class="netline"><span>${esc(a.name)}</span><b style="color:var(--verdant)">${fmtMoney(a.value)}</b></div>`,'sheetAsset')}`;
+    };
+
+    function listModule({eyebrow,title,sub,items,row,empty,sheet}) {
+      return `<span class="eyebrow">${eyebrow}</span><h1 class="page">${title}</h1><p class="sub">${sub}</p>
+      <div class="section card rowlist">${items.length?items.map(it=>`<div class="row">${row(it)}</div>`).join(''):`<div class="empty"><div class="glyph">◻</div><p>${empty}</p><button class="btn btn-ink" onclick="${sheet}()">Add the first</button></div>`}</div>`;
+    }
+
+    V.trust = () => {
+      const scans=S.vault.filter(d=>d.scan).length, vaultState=S.vaultSalt?(vaultUnlocked()?'Unlocked this session':'Locked'):'Not set up yet';
+      const lastBak=S.lastBackup?new Date(S.lastBackup).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'Never';
+      const line=(k,v,good)=>`<div class="netline"><span>${k}</span><b style="color:${good===false?'var(--signal)':good?'var(--verdant)':'var(--ink)'};font-family:var(--font-b);font-weight:600">${v}</b></div>`;
+      return `<button class="backlink" onclick="go('settings')">‹ Settings</button>
+      <span class="eyebrow">Trust & Security</span><h1 class="page">Your data, your rules.</h1><p class="sub">Plain answers about where your information lives.</p>
+      <div class="section"><span class="eyebrow">Status</span><div class="card rowlist" style="margin-top:12px">
+        ${line('Encrypted documents',scans+' scan'+(scans===1?'':'s')+' · AES-256',scans>0)}
+        ${line('Vault passphrase',vaultState,!!S.vaultSalt)}
+        ${line('Cloud sync',isPremium()?'On — synced':'Off — on this device',isPremium())}
+        ${line('Last backup',lastBak,!!S.lastBackup)}
+      </div></div>
+      <div class="section"><span class="eyebrow">Our commitments</span><div class="card pad" style="margin-top:12px"><p style="font-size:14px;color:var(--ink-2);line-height:2">No advertising, ever.<br>No selling your data, ever.<br>No training AI on your data.<br>Free export, always.</p><a class="btn btn-ghost" href="privacy.html" style="width:100%;margin-top:14px">Read the full privacy policy</a></div></div>
+      <div class="section"><span class="eyebrow">Your data</span><div class="card rowlist" style="margin-top:12px">
+        <button class="row" style="width:100%;text-align:left" onclick="exportBackup()"><div class="grow"><div class="title">Download all my data</div><div class="meta">Unencrypted JSON backup</div></div><span class="chip">Export</span></button>
+        <button class="row" style="width:100%;text-align:left" onclick="eraseAll()"><div class="grow"><div class="title" style="color:var(--signal)">Erase everything on this device</div><div class="meta">Permanent — download a backup first</div></div></button>
+      </div></div>`;
+    };
+
+    V.settings = () => {
+      const counts=S.goals.length+S.projects.length+S.home.length+S.vehicles.length+S.vault.length+S.family.length;
+      return `<span class="eyebrow">Settings</span><h1 class="page">Your Keptly.</h1>
+      <p class="sub">${isPremium()?'Backed up and synced across your devices.':'Everything lives on this device until you say otherwise.'}</p>
+      ${accountCard()}
+      <div class="section"><span class="eyebrow">Profile</span><div class="card rowlist" style="margin-top:12px"><div class="row"><div class="grow"><div class="title">${esc(S.profile.name)||'No name set'}</div><div class="meta">Shown in your dashboard greeting</div></div><button class="iconbtn" onclick="sheetProfile()"><svg width="15" height="15" viewBox="0 0 24 24"><path class="ico-stroke" d="M4 20l4-.8L19.5 7.7a2 2 0 0 0-2.8-2.8L5.2 16.4 4 20z"/></svg></button></div></div></div>
+      <div class="section"><span class="eyebrow">Backup & Restore</span><div class="card pad" style="margin-top:12px"><p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">Your life record — <b>${counts} items</b> — is stored in this browser. Download a backup before clearing browser data.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-ink" onclick="exportBackup()" style="flex:1;min-width:130px">Download backup</button><button class="btn btn-ghost" onclick="document.getElementById('restorefile').click()" style="flex:1;min-width:130px">Restore backup</button></div><input type="file" id="restorefile" accept=".json" style="display:none" onchange="restoreBackup(this)"><p style="margin-top:12px;font-size:12.5px;color:var(--ink-3)">${S.lastBackup?'Last backup: '+new Date(S.lastBackup).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'No backup yet.'}</p></div></div>
+      <div class="section"><span class="eyebrow">Trust & Security</span><div class="card rowlist" style="margin-top:12px"><button class="row" style="width:100%;text-align:left" onclick="go('trust')"><div class="grow"><div class="title">Privacy & Security Center</div><div class="meta">Encryption, AI, your commitments</div></div><span class="chip green">Protected</span></button></div></div>
+      <div class="section"><span class="eyebrow">Explore</span><div class="card rowlist" style="margin-top:12px">
+        <button class="row" style="width:100%;text-align:left" onclick="startTour()"><div class="grow"><div class="title">Take the guided tour</div><div class="meta">A 60-second walkthrough</div></div><span class="chip">Start</span></button>
+        <button class="row" style="width:100%;text-align:left" onclick="if(confirm('Load sample data? This replaces what\'s here.'))loadSample()"><div class="grow"><div class="title">Load sample data</div><div class="meta">See Keptly filled in</div></div><span class="chip brass">Demo</span></button>
+      </div></div>
+      <div class="section"><span class="eyebrow">About</span><div class="card rowlist" style="margin-top:12px"><a class="row" href="privacy.html" style="text-decoration:none;color:inherit"><div class="grow"><div class="title">Privacy policy</div></div><span class="chip">View</span></a><div class="row"><div class="grow"><div class="title">Version</div><div class="meta">Keptly 3.0 — Premium redesign</div></div></div></div></div>
+      <div class="section"><span class="eyebrow">Danger Zone</span><div class="card pad" style="margin-top:12px"><button class="btn btn-ghost" style="color:var(--signal);width:100%" onclick="eraseAll()">Erase everything on this device</button></div></div>`;
+    };
+
+    function sheetProfile() { openSheet(`<h3>Your name</h3>${FLD('pr_n','Name','text',S.profile.name)}${ACTIONS('saveProfile()')}`); }
+    function saveProfile() { S.profile.name=fval('pr_n'); save(); closeSheet(); render(); toast('Saved'); }
+
+    function exportBackup() {
+      const blob=new Blob([JSON.stringify({app:'Keptly',schema:1,exportedAt:new Date().toISOString(),data:S},null,2)],{type:'application/json'});
+      const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='keptly-backup-'+todayISO()+'.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+      S.lastBackup=Date.now(); save(); render(); toast('Backup downloaded');
+    }
+    function restoreBackup(input) {
+      const file=input.files&&input.files[0]; if(!file) return;
+      const reader=new FileReader();
+      reader.onload=()=>{ try { const p=JSON.parse(reader.result); const d=p&&(p.app==='Keptly'||p.app==='AVENOR')&&p.data?p.data:p; if(!d||typeof d!=='object'||!('goals' in d)) throw new Error('shape'); if(!confirm('Replace everything on this device with this backup?')){input.value='';return;} S=Object.assign(blank(),d); S.finance=Object.assign({bills:[],subs:[],debts:[],assets:[]},S.finance||{}); save(); render(); toast('Backup restored'); } catch(e) { toast('Not a valid Keptly backup'); } input.value=''; };
+      reader.readAsText(file);
+    }
+    function eraseAll() { if(!confirm('Erase ALL Keptly data? Download a backup first.')) return; if(!confirm('Last check — permanently delete everything?')) return; S=blank(); save(); go('today'); render(); toast('Everything erased'); }
+
+    // ---- CLOUD ----
+    let sb=null, sbSession=null, sbProfile=null, pushTimer=null, syncState='off';
+    function cloudConfigured() { return !window.__noSupabase&&typeof window.supabase!=='undefined'&&window.KEPTLY_CONFIG&&KEPTLY_CONFIG.SUPABASE_URL&&KEPTLY_CONFIG.SUPABASE_ANON_KEY; }
+    function isPremium() { return !!(sbProfile&&(sbProfile.status==='active'||sbProfile.status==='trialing')); }
+    function countItems(st) { return st.goals.length+st.projects.length+st.home.length+st.vehicles.length+st.vault.length+st.family.length+st.finance.bills.length+st.finance.subs.length+st.finance.debts.length+st.finance.assets.length; }
+    async function cloudInit() {
+      if(!cloudConfigured()) return;
+      sb=window.supabase.createClient(KEPTLY_CONFIG.SUPABASE_URL,KEPTLY_CONFIG.SUPABASE_ANON_KEY);
+      const {data:{session}}=await sb.auth.getSession(); sbSession=session;
+      sb.auth.onAuthStateChange((_evt,s)=>{const wasOut=!sbSession;sbSession=s;if(s&&wasOut)afterLogin();if(!s){sbProfile=null;syncState='off';render();}});
+      if(sbSession) await afterLogin(); else render();
+    }
+    async function afterLogin() { try{await refreshProfile();if(isPremium())await firstSync();}catch(e){console.error(e);} render(); }
+    async function refreshProfile() { if(!sb||!sbSession) return; const {data}=await sb.from('profiles').select('*').eq('id',sbSession.user.id).single(); sbProfile=data||null; }
+    async function firstSync() {
+      syncState='syncing'; render();
+      const {data,error}=await sb.from('user_state').select('data,updated_at').eq('user_id',sbSession.user.id).maybeSingle();
+      if(error){syncState='error';render();return;}
+      if(!data){await pushNow();return;}
+      if(!countItems(S)){S=Object.assign(blank(),data.data);S.finance=Object.assign({bills:[],subs:[],assets:[],debts:[]},S.finance||{});save();syncState='synced';render();toast('Restored from cloud');return;}
+      openSheet(`<h3>Two versions found</h3><p class="sub" style="margin:-6px 0 16px">Both this device and your cloud have Keptly data.</p><div class="actions" style="flex-direction:column"><button class="btn btn-ink" onclick="resolveSync('local')">Keep this device (${countItems(S)} items)</button><button class="btn btn-ghost" onclick="resolveSync('cloud')">Keep cloud (synced ${new Date(data.updated_at).toLocaleDateString()})</button></div>`);
+      window._cloudData=data.data;
+    }
+    async function resolveSync(which) { closeSheet(); if(which==='cloud'){S=Object.assign(blank(),window._cloudData||{});S.finance=Object.assign({bills:[],subs:[],assets:[],debts:[]},S.finance||{});save();syncState='synced';render();toast('Cloud version restored');}else{await pushNow();toast('Uploaded');} window._cloudData=null; }
+    function schedulePush() { if(!sb||!sbSession||!isPremium()) return; syncState='syncing'; clearTimeout(pushTimer); pushTimer=setTimeout(pushNow,1800); }
+    async function pushNow() { if(!sb||!sbSession||!isPremium()) return; const {error}=await sb.from('user_state').upsert({user_id:sbSession.user.id,data:S,updated_at:new Date().toISOString()}); syncState=error?'error':'synced'; const el=document.getElementById('syncline'); if(el) el.textContent=syncLabel(); }
+    function syncLabel() { return {off:'Sync off',idle:'Sync ready',syncing:'Syncing…',synced:'All changes synced',error:'Sync error — will retry'}[syncState]; }
+
+    function sheetSignIn(mode) {
+      const m=mode||'in';
+      openSheet(`<h3>${m==='up'?'Create your account':'Log in to Keptly'}</h3><p class="sub" style="margin:-6px 0 16px">${m==='up'?'Start free — we email you a secure 6-digit code.':'Enter your email and we\'ll send a sign-in code.'}</p>${FLD('si_e','Email','email','','you@example.com')}<div class="actions"><button class="btn btn-ink" onclick="sendCode('${m}')">${m==='up'?'Create account':'Send my code'}</button></div><div style="text-align:center;margin-top:14px;font-size:13.5px;color:var(--ink-3)">${m==='up'?`Already have an account? <button onclick="sheetSignIn('in')" style="color:var(--brass);font-weight:600">Log in</button>`:`New to Keptly? <button onclick="sheetSignIn('up')" style="color:var(--brass);font-weight:600">Create account</button>`}</div>`);
+      setTimeout(()=>document.getElementById('si_e')?.focus(),120);
+    }
+    async function sendCode(mode) {
+      const email=fval('si_e'); if(!email||!email.includes('@')) return toast('Enter a valid email');
+      const {error}=await sb.auth.signInWithOtp({email,options:{shouldCreateUser:true}});
+      if(error) return toast(error.message||'Could not send code');
+      openSheet(`<h3>Check your email</h3><p class="sub" style="margin:-6px 0 16px">We sent a 6-digit code to <b>${esc(email)}</b>.</p>${FLD('si_c','6-digit code','text','','123456')}<div class="actions"><button class="btn btn-ink" onclick="verifyCode('${esc(email)}')">Log in</button></div><div style="text-align:center;margin-top:12px;font-size:13px;color:var(--ink-3)">Didn't get it? <button onclick="sendCode('${mode}')" style="color:var(--brass);font-weight:600">Resend</button></div>`);
+      setTimeout(()=>document.getElementById('si_c')?.focus(),120);
+    }
+    async function verifyCode(email) { const token=fval('si_c'); if(!token) return toast('Enter the code'); const {error}=await sb.auth.verifyOtp({email,token,type:'email'}); if(error) return toast('That code didn\'t work'); closeSheet(); toast('Signed in!'); }
+    async function signOut() { await sb.auth.signOut(); toast('Signed out'); }
+    async function startCheckout(interval) { if(!sbSession) return sheetSignIn(); toast('Opening checkout…'); try { const r=await fetch('/api/create-checkout-session',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+sbSession.access_token},body:JSON.stringify({interval})}); const j=await r.json(); if(j.url) location.href=j.url; else toast(j.error||'Checkout unavailable'); } catch(e) { toast('Checkout unavailable'); } }
+    async function openPortal() { try { const r=await fetch('/api/create-portal-session',{method:'POST',headers:{'Authorization':'Bearer '+sbSession.access_token}}); const j=await r.json(); if(j.url) location.href=j.url; else toast(j.error||'Portal unavailable'); } catch(e) { toast('Portal unavailable'); } }
+
+    function accountCard() {
+      const plans=`<div class="grid2" style="margin-top:12px"><div class="card pad"><div class="chip" style="margin-bottom:8px">Free</div><div style="font-family:var(--font-d);font-size:30px">$0</div><p style="font-size:12.5px;color:var(--ink-3);margin:6px 0 10px">Everything, one device.</p><p style="font-size:12.5px;color:var(--ink-2);line-height:1.8">All modules<br>Works offline<br>Emergency Mode<br>25 vault docs</p></div><div class="card pad" style="border-color:var(--brass);background:var(--brass-tint)"><div class="chip brass" style="margin-bottom:8px">Premium</div><div style="font-family:var(--font-d);font-size:30px">$6<span style="font-size:14px;color:var(--ink-3)">/mo</span></div><p style="font-size:12.5px;color:var(--ink-3);margin:6px 0 10px">or $48/yr · 14-day trial</p><p style="font-size:12.5px;color:var(--ink-2);line-height:1.8">Cloud backup<br>Multi-device sync<br>Unlimited vault<br>Everything in Free</p></div></div>`;
+      if(!cloudConfigured()) return`<div class="section"><span class="eyebrow">Subscription</span>${plans}<div class="card pad" style="margin-top:12px"><p style="font-size:13.5px;color:var(--ink-2)">Sign-in and Premium turn on once cloud sync is configured. See <code style="font-size:12px;background:var(--pore);padding:1px 5px;border-radius:4px">SETUP-CLOUD.md</code> for setup. Until then, Keptly runs free and fully offline.</p></div></div>`;
+      if(!sbSession) return`<div class="section"><span class="eyebrow">Subscription</span>${plans}<div class="card pad" style="margin-top:12px"><p style="font-size:14px;color:var(--ink-2);margin-bottom:14px">Create a free account to start your <b>14-day Premium trial</b>.</p><button class="btn btn-ink" style="width:100%" onclick="sheetSignIn('up')">Create free account</button><button class="btn btn-ghost" style="width:100%;margin-top:10px" onclick="sheetSignIn('in')">Log in</button></div></div>`;
+      if(!isPremium()) return`<div class="section"><span class="eyebrow">Account & Sync</span><div class="card pad" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><b>${esc(sbSession.user.email)}</b><span class="chip">Free</span></div><p style="font-size:14px;color:var(--ink-2);margin:10px 0 14px">Upgrade to Premium — <b>14 days free</b>.</p><div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-ink" style="flex:1;min-width:120px" onclick="startCheckout('monthly')">$6 / month</button><button class="btn btn-ghost" style="flex:1;min-width:120px" onclick="startCheckout('yearly')">$48 / year</button></div><button class="btn-quiet" style="width:100%;margin-top:10px" onclick="signOut()">Sign out</button></div></div>`;
+      return`<div class="section"><span class="eyebrow">Account & Sync</span><div class="card pad" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center"><b>${esc(sbSession.user.email)}</b><span class="chip brass">Premium${sbProfile.status==='trialing'?' · trial':''}</span></div><p id="syncline" style="margin-top:8px;font-size:13px;color:var(--ink-3)">${syncLabel()}</p><div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn btn-ghost" style="flex:1" onclick="openPortal()">Manage billing</button><button class="btn btn-ghost" style="flex:1" onclick="signOut()">Sign out</button></div></div></div>`;
+    }
+
+    // ---- SHEETS ----
+    const sheetEl=document.getElementById('sheet'), scrimEl=document.getElementById('scrim');
+    function openSheet(html) { sheetEl.innerHTML='<div class="grab"></div>'+html; sheetEl.classList.add('show'); scrimEl.classList.add('show'); if(matchMedia('(min-width:900px)').matches){const f=sheetEl.querySelector('input,select,textarea');if(f)f.focus();} }
+    function closeSheet() { sheetEl.classList.remove('show'); scrimEl.classList.remove('show'); }
+    function fval(id) { const el=document.getElementById(id); return el?el.value.trim():''; }
+    const FLD=(id,label,type='text',val='',ph='')=>`<div class="field"><label for="${id}">${label}</label><input id="${id}" type="${type}" value="${esc(val)}" placeholder="${ph}"></div>`;
+    const SEL=(id,label,opts,val)=>`<div class="field"><label for="${id}">${label}</label><select id="${id}">${opts.map(o=>`<option ${o===val?'selected':''}>${o}</option>`).join('')}</select></div>`;
+    const ACTIONS=(saveFn,delFn)=>`<div class="actions">${delFn?`<button class="btn btn-ghost" style="color:var(--signal)" onclick="${delFn}">Delete</button>`:''}<button class="btn btn-ink" onclick="${saveFn}">Save</button></div>`;
+
+    function sheetGoal(id) { const g=id?S.goals.find(g=>g.id===id):null; openSheet(`<h3>${g?'Edit goal':'New goal'}</h3>${FLD('g_t','Goal','text',g?.title||'','e.g. Own a home')}${SEL('g_h','Horizon',HORIZONS,g?.horizon||'1 year')}${FLD('g_d','Target date','date',g?.target||'')}${FLD('g_p','Progress (0–100)','number',g?.progress??0)}${ACTIONS(`saveGoal('${id||''}')`,g?`delItem('goals','${id}')`:null)}`); }
+    function saveGoal(id) { const t=fval('g_t'); if(!t) return toast('Give the goal a name'); const data={title:t,horizon:fval('g_h'),target:fval('g_d'),progress:Math.min(100,Math.max(0,Number(fval('g_p'))||0))}; if(id){Object.assign(S.goals.find(g=>g.id===id),data);}else{S.goals.push({id:uid(),...data});log('Set goal "'+t+'"');} save();closeSheet();render();toast('Goal saved'); }
+    function sheetProject(id) { const p=id?S.projects.find(p=>p.id===id):null; openSheet(`<h3>${p?'Edit project':'New project'}</h3>${FLD('p_t','Project','text',p?.title||'','e.g. Buy a house')}${SEL('p_g','Serves goal',['(none)',...S.goals.map(g=>g.title)],p?(S.goals.find(g=>g.id===p.goalId)?.title||'(none)'):'(none)')}${SEL('p_s','Status',['Active','On hold','Done'],p?.status||'Active')}<div class="grid2">${FLD('p_b','Budget $','number',p?.budget||'')}${FLD('p_sp','Spent $','number',p?.spent||'')}</div><div class="field"><label for="p_n">Notes</label><textarea id="p_n">${esc(p?.notes||'')}</textarea></div>${ACTIONS(`saveProject('${id||''}')`,p?`delItem('projects','${id}')`:null)}`); }
+    function saveProject(id) { const t=fval('p_t'); if(!t) return toast('Give the project a name'); const gl=S.goals.find(g=>g.title===fval('p_g')); const data={title:t,goalId:gl?gl.id:null,status:fval('p_s'),budget:Number(fval('p_b'))||0,spent:Number(fval('p_sp'))||0,notes:document.getElementById('p_n').value.trim()}; if(id){Object.assign(S.projects.find(p=>p.id===id),data);}else{S.projects.push({id:uid(),tasks:[],...data});log('Started "'+t+'"');} save();closeSheet();render();toast('Project saved'); }
+    function sheetTask(pid) { openSheet(`<h3>New task</h3>${FLD('t_t','Task','text','','Next concrete move')}${FLD('t_d','Due','date')}${ACTIONS(`saveTask('${pid}')`)}`); }
+    function saveTask(pid) { const t=fval('t_t'); if(!t) return toast('Name the task'); const p=S.projects.find(p=>p.id===pid); p.tasks=p.tasks||[]; p.tasks.push({id:uid(),title:t,due:fval('t_d'),done:false}); save();closeSheet();render();toast('Task added'); }
+    function sheetHome(id) { const h=id?S.home.find(x=>x.id===id):null; openSheet(`<h3>${h?'Edit item':'Home item'}</h3>${FLD('h_i','Item','text',h?.item||'','e.g. HVAC filter')}${SEL('h_c','Category',['Maintenance','Repair','Appliance','Utility','Property'],h?.category||'Maintenance')}<div class="grid2">${FLD('h_l','Last serviced','date',h?.lastService||'')}${FLD('h_n','Next due','date',h?.nextDue||'')}</div>${FLD('h_w','Warranty until','date',h?.warrantyUntil||'')}${ACTIONS(`saveHome('${id||''}')`,h?`delItem('home','${id}')`:null)}`); }
+    function saveHome(id) { const t=fval('h_i'); if(!t) return toast('Name the item'); const data={item:t,category:fval('h_c'),lastService:fval('h_l'),nextDue:fval('h_n'),warrantyUntil:fval('h_w')}; if(id){Object.assign(S.home.find(x=>x.id===id),data);}else S.home.push({id:uid(),...data}); save();closeSheet();render();toast('Saved'); }
+    function sheetVehicle(id) { const v=id?S.vehicles.find(x=>x.id===id):null; openSheet(`<h3>${v?'Edit vehicle':'Add vehicle'}</h3>${FLD('v_n','Vehicle','text',v?.name||'','e.g. 2014 Honda Accord')}${FLD('v_o','Odometer (mi)','number',v?.odometer||'')}<div class="grid2">${FLD('v_i','Insurance renews','date',v?.insurance||'')}${FLD('v_r','Registration renews','date',v?.registration||'')}</div>${ACTIONS(`saveVehicle('${id||''}')`,v?`delItem('vehicles','${id}')`:null)}`); }
+    function saveVehicle(id) { const t=fval('v_n'); if(!t) return toast('Name the vehicle'); const data={name:t,odometer:fval('v_o'),insurance:fval('v_i'),registration:fval('v_r')}; if(id){Object.assign(S.vehicles.find(x=>x.id===id),data);}else S.vehicles.push({id:uid(),services:[],...data}); save();closeSheet();render();toast('Vehicle saved'); }
+    function sheetService(vid) { openSheet(`<h3>Log service</h3>${FLD('s_t','Work done','text','','e.g. Oil change, brake pads')}<div class="grid2">${FLD('s_d','Date','date',todayISO())}${FLD('s_c','Cost $','number')}</div>${FLD('s_o','Odometer (mi)','number')}${ACTIONS(`saveService('${vid}')`)}`); }
+    function saveService(vid) { const t=fval('s_t'); if(!t) return toast('Describe the work'); const v=S.vehicles.find(x=>x.id===vid); v.services=v.services||[]; v.services.push({id:uid(),type:t,date:fval('s_d'),cost:Number(fval('s_c'))||0,odo:fval('s_o')}); if(fval('s_o')) v.odometer=fval('s_o'); save();closeSheet();render();toast('Service logged'); }
+
+    let _pendingScan=null;
+    function sheetDoc(id,scan) {
+      const d=id?S.vault.find(x=>x.id===id):null;
+      _pendingScan=scan&&scan.scan?scan.scan:(d&&d.scan?d.scan:null);
+      const cat=scan?.category||d?.category||'Identity', ref=scan?.ref||d?.ref||'', exp=scan?.expires||d?.expires||'', title=scan?.title||d?.title||'';
+      const byAI=scan&&scan.ai, conf=byAI&&typeof scan.confidence==='number'?Math.round(scan.confidence*100):null;
+      const detected=scan&&(scan.ref||scan.expires||scan.title)?`<div class="card pad" style="background:var(--verdant-tint);border-color:var(--verdant);margin-bottom:14px"><div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--verdant);display:flex;justify-content:space-between"><span>${byAI?'✦ Read by AI':'✓ Read from scan'}</span>${conf!==null?`<span>${conf}%</span>`:''}</div><p style="font-size:13px;color:var(--ink-2);margin-top:4px">${scan.provider?esc(scan.provider)+'. ':''}${scan.expires?'Expiry '+fmtDate(scan.expires)+'. ':''}${scan.ref?'Ref '+esc(scan.ref)+'.':''}</p></div>`:'';
+      openSheet(`<h3>${d?'Edit document':_pendingScan?'Save scanned document':'Add document'}</h3>${detected}${_pendingScan?`<div style="text-align:center;margin-bottom:14px"><img id="scanthumb" style="max-height:140px;border-radius:10px;border:1px solid var(--hair)" alt="scan"></div>`:''}<div class="field"><label for="d_t">Document</label><input id="d_t" type="text" value="${esc(title)}" placeholder="e.g. Passport"></div>${SEL('d_c','Category',VAULT_CATS,cat)}${FLD('d_r','Reference / policy #','text',ref)}${FLD('d_e','Expires','date',exp)}${ACTIONS(`saveDoc('${id||''}')`,d?`delItem('vault','${id}')`:null)}`);
+      if(_pendingScan&&vaultUnlocked()) decryptBlob(_pendingScan).then(u=>{const im=document.getElementById('scanthumb');if(im)im.src=u;}).catch(()=>{});
+    }
+    function saveDoc(id) {
+      const t=fval('d_t'); if(!t) return toast('Name the document');
+      if(!id&&S.vault.length>=25&&!isPremium()){closeSheet();toast('Free plan: 25 documents max — Premium is unlimited');go('settings');return;}
+      const data={title:t,category:fval('d_c'),ref:fval('d_r'),expires:fval('d_e')};
+      if(_pendingScan) data.scan=_pendingScan;
+      if(id){Object.assign(S.vault.find(x=>x.id===id),data);}else S.vault.push({id:uid(),...data});
+      _pendingScan=null; save();closeSheet();render();toast(data.scan?'Encrypted and filed':'Filed in the vault');
+    }
+    function viewScan(id) { if(!vaultUnlocked()) return sheetUnlock(); const d=S.vault.find(x=>x.id===id); if(!d||!d.scan) return; decryptBlob(d.scan).then(u=>{openSheet(`<h3>${esc(d.title)}</h3><img style="width:100%;border-radius:12px;border:1px solid var(--hair)" src="${u}" alt="${esc(d.title)}"><div class="actions"><button class="btn btn-ghost" onclick="closeSheet()">Close</button></div>`);}).catch(()=>toast('Could not open')); }
+
+    function sheetPerson(id) { const f=id?S.family.find(x=>x.id===id):null; openSheet(`<h3>${f?'Edit person':'Add person'}</h3>${FLD('f_n','Name','text',f?.name||'')}<div class="grid2">${FLD('f_r','Relation','text',f?.relation||'','Spouse, child…')}${FLD('f_p','Phone','tel',f?.phone||'')}</div>${FLD('f_m','Medical notes','text',f?.medical||'','Allergies, blood type…')}${SEL('f_e','Emergency contact',['No','Yes'],f?.emergency?'Yes':'No')}${ACTIONS(`savePerson('${id||''}')`,f?`delItem('family','${id}')`:null)}`); }
+    function savePerson(id) { const t=fval('f_n'); if(!t) return toast('Add a name'); const data={name:t,relation:fval('f_r'),phone:fval('f_p'),medical:fval('f_m'),emergency:fval('f_e')==='Yes'}; if(id){Object.assign(S.family.find(x=>x.id===id),data);}else S.family.push({id:uid(),...data}); save();closeSheet();render();toast('Saved'); }
+    function sheetInsurance(id) { const p=id?S.insurance.find(x=>x.id===id):null; openSheet(`<h3>${p?'Edit policy':'Add insurance'}</h3>${FLD('i_n','Policy name','text',p?.name||'','e.g. Auto — Honda')}${SEL('i_t','Type',['Auto','Health','Home','Life','Renters','Dental','Other'],p?.type||'Auto')}${FLD('i_pr','Provider','text',p?.provider||'')}${FLD('i_po','Policy number','text',p?.policy||'')}${FLD('i_r','Renews / expires','date',p?.renews||'')}${ACTIONS(`saveInsurance('${id||''}')`,p?`delItem('insurance','${id}')`:null)}`); }
+    function saveInsurance(id) { const t=fval('i_n'); if(!t) return toast('Name the policy'); const data={name:t,type:fval('i_t'),provider:fval('i_pr'),policy:fval('i_po'),renews:fval('i_r')}; if(id){Object.assign(S.insurance.find(x=>x.id===id),data);}else S.insurance.push({id:uid(),...data}); save();closeSheet();render();toast('Policy saved'); }
+    function sheetMedical(id) { const m=id?S.medical.find(x=>x.id===id):null; const people=['(me)',...S.family.map(f=>f.name)]; openSheet(`<h3>${m?'Edit entry':'Add medical info'}</h3>${SEL('m_t','Type',['Medication','Allergy','Condition','Provider','Blood type','Vaccination','Other'],m?.type||'Medication')}${FLD('m_l','Label','text',m?.label||'','e.g. Penicillin')}${FLD('m_d','Detail','text',m?.detail||'','dosage, severity…')}${SEL('m_p','Who',people,m?.person||'(me)')}${SEL('m_c','Show in Emergency Mode',['No','Yes'],m?.critical?'Yes':'No')}${ACTIONS(`saveMedical('${id||''}')`,m?`delItem('medical','${id}')`:null)}`); }
+    function saveMedical(id) { const t=fval('m_l'); if(!t) return toast('Add a label'); const data={label:t,type:fval('m_t'),detail:fval('m_d'),person:fval('m_p'),critical:fval('m_c')==='Yes'}; if(id){Object.assign(S.medical.find(x=>x.id===id),data);}else S.medical.push({id:uid(),...data}); save();closeSheet();render();toast('Saved'); }
+    function sheetLegacyText(key,label) { openSheet(`<h3>${label}</h3><div class="field"><label for="lg">${label}</label><textarea id="lg" style="min-height:160px">${esc(S.legacy[key]||'')}</textarea></div><div class="actions"><button class="btn btn-ink" onclick="S.legacy['${key}']=document.getElementById('lg').value.trim();save();closeSheet();render();toast('Saved')">Save</button></div>`); }
+    function sheetLegacyContact() { openSheet(`<h3>Trusted contact</h3>${FLD('lc_n','Name','text','')}<div class="grid2">${FLD('lc_r','Relation','text','')}${FLD('lc_p','Phone','tel','')}</div><div class="actions"><button class="btn btn-ink" onclick="saveLegacyContact()">Add</button></div>`); }
+    function saveLegacyContact() { const n=fval('lc_n'); if(!n) return toast('Add a name'); S.legacy.contacts.push({id:uid(),name:n,relation:fval('lc_r'),phone:fval('lc_p')}); save();closeSheet();render();toast('Added'); }
+    function delLegacyContact(id) { if(!confirm('Remove this trusted contact?')) return; S.legacy.contacts=S.legacy.contacts.filter(c=>c.id!==id); save();render(); }
+
+    const finSheet=(title,fields,saveFn)=>{openSheet(`<h3>${title}</h3>${fields}${ACTIONS(saveFn)}`);};
+    function sheetBill() { finSheet('Add bill',FLD('b_n','Bill','text','','Rent, electric…')+`<div class="grid2">${FLD('b_a','Amount $ / mo','number')}${FLD('b_d','Due day','number')}</div>`+SEL('b_p','Autopay',['No','Yes']),'saveBill()'); }
+    function saveBill() { const n=fval('b_n'); if(!n) return toast('Name the bill'); S.finance.bills.push({id:uid(),name:n,amount:Number(fval('b_a'))||0,dueDay:fval('b_d'),autopay:fval('b_p')==='Yes'}); save();closeSheet();render();toast('Bill added'); }
+    function sheetSub() { finSheet('Add subscription',FLD('su_n','Service','text')+`<div class="grid2">${FLD('su_a','Amount $','number')}${SEL('su_c','Cycle',['Monthly','Yearly'])}</div>`,'saveSub()'); }
+    function saveSub() { const n=fval('su_n'); if(!n) return toast('Name the service'); S.finance.subs.push({id:uid(),name:n,amount:Number(fval('su_a'))||0,cycle:fval('su_c')}); save();closeSheet();render();toast('Subscription added'); }
+    function sheetDebt() { finSheet('Add debt',FLD('de_n','Debt','text','','Car loan, card…')+`<div class="grid2">${FLD('de_b','Balance $','number')}${FLD('de_r','APR %','number')}</div>`,'saveDebt()'); }
+    function saveDebt() { const n=fval('de_n'); if(!n) return toast('Name the debt'); S.finance.debts.push({id:uid(),name:n,balance:Number(fval('de_b'))||0,rate:fval('de_r')}); save();closeSheet();render();toast('Debt added'); }
+    function sheetAsset() { finSheet('Add asset',FLD('as_n','Asset','text','','Savings, vehicle…')+FLD('as_v','Value $','number'),'saveAsset()'); }
+    function saveAsset() { const n=fval('as_n'); if(!n) return toast('Name the asset'); S.finance.assets.push({id:uid(),name:n,value:Number(fval('as_v'))||0}); save();closeSheet();render();toast('Asset added'); }
+    function delItem(coll,id) { if(!confirm('Delete permanently?')) return; S[coll]=S[coll].filter(x=>x.id!==id); save();closeSheet();if(route().startsWith('projects/'))go('projects');render();toast('Deleted'); }
+
+    // ---- SEARCH ----
+    function searchIndex() {
+      const out=[];
+      S.goals.forEach(g=>out.push({type:'Goal',label:g.title,sub:g.horizon,go:'goals'}));
+      S.projects.forEach(p=>{out.push({type:'Project',label:p.title,sub:p.status||'Active',go:'projects/'+p.id});(p.tasks||[]).forEach(t=>out.push({type:'Task',label:t.title,sub:p.title,go:'projects/'+p.id}));});
+      S.home.forEach(x=>out.push({type:'Home',label:x.item,sub:x.category||'',go:'home'}));
+      S.vehicles.forEach(v=>{out.push({type:'Vehicle',label:v.name,sub:'',go:'vehicles'});});
+      S.vault.forEach(d=>out.push({type:'Document',label:d.title,sub:[d.category,d.ref].filter(Boolean).join(' · '),go:'vault'}));
+      S.family.forEach(f=>out.push({type:'Person',label:f.name,sub:f.relation||'',go:'family'}));
+      (S.insurance||[]).forEach(p=>out.push({type:'Insurance',label:p.name,sub:[p.type,p.provider].filter(Boolean).join(' · '),go:'insurance'}));
+      (S.medical||[]).forEach(m=>out.push({type:'Medical',label:m.label,sub:m.type||'',go:'medical'}));
+      S.finance.bills.forEach(b=>out.push({type:'Bill',label:b.name,sub:fmtMoney(b.amount)+'/mo',go:'finance'}));
+      S.finance.subs.forEach(s=>out.push({type:'Subscription',label:s.name,sub:fmtMoney(s.amount),go:'finance'}));
+      return out;
+    }
+    function openSearch() {
+      openSheet(`<h3>Search everything</h3>${FLD('q','','text','','Goals, tasks, documents, people…')}<div id="qres" style="margin-top:6px"></div>`);
+      const inp=document.getElementById('q'); inp.setAttribute('autocomplete','off');
+      inp.oninput=()=>renderSearch(inp.value.trim().toLowerCase());
+      renderSearch('');
+    }
+    function renderSearch(q) {
+      const box=document.getElementById('qres'); if(!box) return;
+      if(!q){box.innerHTML='<p class="sub" style="padding:14px 2px">Start typing to find anything.</p>';return;}
+      const hits=searchIndex().filter(x=>(x.label+' '+x.sub).toLowerCase().includes(q)).slice(0,12);
+      if(!hits.length){box.innerHTML='<p class="sub" style="padding:14px 2px">Nothing matches "'+esc(q)+'".</p>';return;}
+      box.innerHTML='<div class="card rowlist">'+hits.map(x=>`<button class="row" style="width:100%;text-align:left" onclick="closeSheet();go('${x.go}')"><div class="grow"><div class="title">${esc(x.label)}</div><div class="meta">${x.sub?esc(x.sub):''}</div></div><span class="chip">${x.type}</span></button>`).join('')+'</div>';
+    }
+
+    // ---- SAMPLE DATA ----
+    function loadSample() {
+      const plus=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}, minus=n=>plus(-n);
+      const g1=uid(),g2=uid(),g3=uid();
+      S.goals=[{id:g1,title:'Own a home',horizon:'5 years',target:plus(1500),progress:35},{id:g2,title:'Build a 6-month emergency fund',horizon:'1 year',target:plus(300),progress:55},{id:g3,title:'Run a half marathon',horizon:'90 days',target:plus(80),progress:40}];
+      S.projects=[{id:uid(),title:'Save for a down payment',goalId:g1,status:'Active',budget:40000,spent:14000,notes:'Target 10% down. Auto-transfer every payday.',tasks:[{id:uid(),title:'Open a high-yield savings account',due:minus(20),done:true,doneAt:Date.now()-1728e6},{id:uid(),title:'Set up automatic transfer',due:minus(5),done:true,doneAt:Date.now()-432e6},{id:uid(),title:'Get pre-approval estimate',due:plus(14),done:false},{id:uid(),title:'Research first-time buyer programs',due:plus(30),done:false}]},{id:uid(),title:'Half marathon training',goalId:g3,status:'Active',budget:0,spent:0,notes:'12-week plan. Long run Sundays.',tasks:[{id:uid(),title:'Buy proper running shoes',due:minus(2),done:true,doneAt:Date.now()-1728e5},{id:uid(),title:'Complete week 4 long run',due:plus(2),done:false},{id:uid(),title:'Register for the race',due:minus(1),done:false}]}];
+      S.home=[{id:uid(),item:'HVAC filter',category:'Maintenance',lastService:minus(60),nextDue:plus(20)},{id:uid(),item:'Water heater',category:'Appliance',lastService:minus(400),warrantyUntil:plus(700)},{id:uid(),item:'Smoke detector batteries',category:'Maintenance',lastService:minus(200),nextDue:plus(5)}];
+      S.vehicles=[{id:uid(),name:'2016 Honda Accord',odometer:'92400',insurance:plus(40),registration:plus(110),services:[{id:uid(),type:'Oil change',date:minus(50),cost:65,odo:'90100'},{id:uid(),type:'Front brake pads',date:minus(120),cost:280,odo:'87500'}]}];
+      S.vault=[{id:uid(),title:'Passport',category:'Identity',ref:'•••• 4821',expires:plus(900)},{id:uid(),title:'Auto insurance policy',category:'Insurance',ref:'POL-77204',expires:plus(40)},{id:uid(),title:'Apartment lease',category:'Contracts',ref:'',expires:plus(220)}];
+      S.family=[{id:uid(),name:'Maria',relation:'Spouse',phone:'555-0142',medical:'Penicillin allergy',emergency:true},{id:uid(),name:'Dr. Allen',relation:'Family doctor',phone:'555-0199',medical:'',emergency:true}];
+      S.finance={bills:[{id:uid(),name:'Rent',amount:1450,dueDay:'1',autopay:true},{id:uid(),name:'Electric',amount:95,dueDay:'12',autopay:false},{id:uid(),name:'Phone',amount:60,dueDay:'18',autopay:true}],subs:[{id:uid(),name:'Streaming bundle',amount:24,cycle:'Monthly'},{id:uid(),name:'Gym',amount:300,cycle:'Yearly'}],debts:[{id:uid(),name:'Car loan',balance:8200,rate:'4.9'}],assets:[{id:uid(),name:'Emergency savings',value:6600},{id:uid(),name:'2016 Honda Accord',value:14000}]};
+      S.emergency={medical:'Blood type O+. No known allergies. Mild asthma — rescue inhaler in bag.',insurance:'Health: BlueCross member 99812. Auto: policy POL-77204.',plan:'Meet at the corner store on Elm if separated. Out-of-town contact: Aunt Rosa 555-0177.'};
+      log('Loaded sample data'); save(); go('today'); render(); toast('Sample life loaded — explore, then erase in Settings');
+    }
+
+    // ---- EMERGENCY MODE ----
+    function openEmergency() {
+      const ice=S.family.filter(f=>f.emergency||f.phone), E=S.emergency;
+      document.getElementById('emg').innerHTML=`
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+        <div style="width:12px;height:12px;border-radius:50%;background:#FF6B6B;flex-shrink:0;animation:emg-pulse 1.5s ease-in-out infinite"></div>
+        <span style="font-family:var(--font-d);font-size:11.5px;letter-spacing:.28em;text-transform:uppercase;color:rgba(255,150,120,.9)">Emergency Mode</span>
+      </div>
+      <h2 style="font-family:var(--font-d);font-size:clamp(26px,7vw,36px);font-weight:400;color:#fff;margin-bottom:6px">Stay calm.</h2>
+      <p style="font-size:16px;color:rgba(255,255,255,.7);margin-bottom:26px">Everything you need is right here.</p>
+
+      <div style="margin-bottom:14px">
+        <div style="font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,150,120,.85);margin-bottom:10px;font-weight:700">Call now</div>
+        <a class="emg-911" href="tel:911">
+          <div><div style="font-size:11px;letter-spacing:.06em;text-transform:uppercase;opacity:.65;margin-bottom:2px">Emergency services</div><div style="font-weight:800;font-size:17px">Call 911</div></div>
+          <span style="font-family:var(--font-m);font-size:24px;color:#FF9999;font-weight:700">911</span>
+        </a>
+        ${ice.map(f=>`<a class="emg-call" href="tel:${esc(f.phone)}"><div><div style="font-weight:700;font-size:15px">${esc(f.name)}</div>${f.relation?`<div style="font-size:12px;color:rgba(255,255,255,.6)">${esc(f.relation)}</div>`:''}</div><span style="font-family:var(--font-m);font-size:16px;color:rgba(255,200,150,.95)">${esc(f.phone)}</span></a>`).join('')||'<p style="color:rgba(255,255,255,.6);font-size:14px;padding:8px 0">Add emergency contacts in the Family Hub.</p>'}
+      </div>
+
+      ${E.medical||(S.medical||[]).filter(m=>m.critical).length||S.family.filter(f=>f.medical).length?`<div class="emg-block"><h4>Medical</h4>${E.medical?`<p style="font-size:14px;color:rgba(255,255,255,.9);line-height:1.65;white-space:pre-wrap">${esc(E.medical)}</p>`:''} ${(S.medical||[]).filter(m=>m.critical).map(m=>`<div style="padding:8px 0;border-top:1px solid rgba(255,255,255,.1);margin-top:8px"><b style="color:#fff">${esc(m.label)}</b>${m.detail?' — '+esc(m.detail):''}</div>`).join('')}${S.family.filter(f=>f.medical).map(f=>`<div style="padding:8px 0;border-top:1px solid rgba(255,255,255,.1);margin-top:8px"><b style="color:#fff">${esc(f.name)}:</b> ${esc(f.medical)}</div>`).join('')}</div>`:''}
+
+      ${(S.insurance||[]).length||E.insurance?`<div class="emg-block"><h4>Insurance</h4>${(S.insurance||[]).map(p=>`<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08)"><span>${esc(p.name)}</span><span style="font-family:var(--font-m);font-size:13px;color:rgba(255,200,150,.9)">${esc(p.policy||'')}</span></div>`).join('')}${E.insurance&&!S.insurance.length?`<p style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.65">${esc(E.insurance)}</p>`:''}</div>`:''}
+
+      ${E.plan?`<div class="emg-block"><h4>Family plan</h4><p style="font-size:14px;color:rgba(255,255,255,.85);line-height:1.65;white-space:pre-wrap">${esc(E.plan)}</p></div>`:''}
+
+      <button class="emg-edit" onclick="closeEmergency();sheetEmergency()">Edit emergency information</button>
+      <button class="emg-close" onclick="closeEmergency()">Close emergency mode</button>`;
+      document.getElementById('emg').classList.add('show');
+    }
+    function closeEmergency() { document.getElementById('emg').classList.remove('show'); }
+    function sheetEmergency() {
+      const E=S.emergency;
+      openSheet(`<h3>Emergency information</h3><div class="field"><label for="e_m">Medical (you)</label><textarea id="e_m" placeholder="Blood type, allergies, conditions, medications">${esc(E.medical)}</textarea></div><div class="field"><label for="e_i">Insurance</label><textarea id="e_i" placeholder="Health policy #, auto policy #">${esc(E.insurance)}</textarea></div><div class="field"><label for="e_p">Family plan</label><textarea id="e_p" placeholder="Meeting point, out-of-town contact">${esc(E.plan)}</textarea></div>${ACTIONS('saveEmergency()')}`);
+    }
+    function saveEmergency() { S.emergency={medical:document.getElementById('e_m').value.trim(),insurance:document.getElementById('e_i').value.trim(),plan:document.getElementById('e_p').value.trim()}; save();closeSheet();toast('Emergency info updated'); }
+
+    // ---- TOUR ----
+    const TOUR=[{r:'today',t:'Your Life Dashboard',b:'Life Pulse and what needs you today — surfaced the moment you open the app.'},{r:'goals',t:'Goals',b:'Set a vision across five horizons, from 30 days out to five years.'},{r:'projects',t:'Projects',b:'Turn a goal into motion. Each project holds its own tasks, budget and notes.'},{r:'vault',t:'Document Vault',b:'Passports, policies, contracts — with expiry dates one tap away, even offline.'},{r:'finance',t:'Finance Center',b:'Bills, subscriptions, debts and assets. See your monthly fixed cost at a glance.'},{r:'settings',t:'Settings & Premium',b:'Back up your data, and under Account & Sync, start Premium to sync across all your devices.'},{r:'today',t:'One more thing',b:'The red Emergency button is always in reach — contacts, medical info and your family plan, instantly.'}];
+    let tourI=0;
+    function startTour() { closeSheet(); tourI=0; showTour(); }
+    function showTour() {
+      const step=TOUR[tourI]; if(!step) return endTour();
+      go(step.r);
+      setTimeout(()=>{
+        let ov=document.getElementById('tour'); if(!ov){ov=document.createElement('div');ov.id='tour';document.body.appendChild(ov);}
+        ov.className='tourwrap';
+        ov.innerHTML=`<div class="scrim show" style="z-index:100" onclick="endTour()"></div><div class="tourcard"><span class="eyebrow">Tour · ${tourI+1} of ${TOUR.length}</span><h3>${step.t}</h3><p>${step.b}</p><div class="tourdots">${TOUR.map((_,i)=>`<i class="${i===tourI?'on':''}"></i>`).join('')}</div><div class="touract"><button class="btn-quiet" onclick="endTour()">Skip</button><button class="btn btn-ink" onclick="nextTour()">${tourI===TOUR.length-1?'Finish':'Next'}</button></div></div>`;
+      },120);
+    }
+    function nextTour() { tourI++; tourI<TOUR.length?showTour():endTour(); }
+    function endTour() { const ov=document.getElementById('tour'); if(ov) ov.remove(); }
+
+    // ---- FAB ----
+    function fabAction() {
+      const r=route().split('/')[0];
+      const map={vault:startScan,insurance:sheetInsurance,medical:sheetMedical,legacy:sheetLegacyContact,goals:sheetGoal,projects:()=>{const sub=route().split('/')[1];sub?sheetTask(sub):sheetProject();},home:sheetHome,vehicles:sheetVehicle,family:sheetPerson,finance:sheetBill,watch:sheetBill};
+      (map[r]||sheetProject)();
+    }
+
+    // ---- ONBOARDING ----
+    let obSelectedStart=null;
+    function obShowStep(n) { document.querySelectorAll('.ob-step').forEach((el,i)=>{el.classList.toggle('active',i===n);el.style.display=i===n?'flex':'none';}); }
+    function obNext() {
+      const active=[...document.querySelectorAll('.ob-step')].findIndex(el=>el.classList.contains('active'));
+      if(active===1){const n=document.getElementById('ob-name')?.value?.trim();if(n)S.profile.name=n;}
+      if(active<3) obShowStep(active+1);
+      setTimeout(()=>{const inp=document.getElementById('ob-name');if(inp)inp.focus();},100);
+    }
+    function obSelect(el,r) { obSelectedStart=r; document.querySelectorAll('.ob-card').forEach(c=>c.classList.remove('sel')); el.classList.add('sel'); }
+    function obFinish() {
+      S.onboarded=1; save();
+      const ov=document.getElementById('onboard');
+      if(ov){ov.style.transition='opacity .4s ease';ov.style.opacity='0';setTimeout(()=>{ov.style.display='none';ov.style.opacity='';},420);}
+      render(); go(obSelectedStart||'today'); toast('Welcome to Keptly'+(S.profile.name?', '+S.profile.name:'')+'!');
+    }
+    function obSample() { S.onboarded=1; obFinish(); setTimeout(()=>loadSample(),200); }
+
+    // ---- RENDER ----
+    function render() {
+      renderNav();
+      const r=route().split('/')[0], v=document.getElementById('view');
+      try { v.innerHTML=(V[r]||V.today)(); }
+      catch(err) { console.error('view '+r,err); v.innerHTML='<div class="empty" style="padding:60px 20px"><div class="glyph">!</div><p>Something went wrong. Your data is safe.</p><button class="btn btn-ghost" onclick="go(\'today\')">Back to dashboard</button></div>'; }
+      v.classList.remove('view'); void v.offsetWidth; v.classList.add('view');
+      closeSheet();
+      if(r==='today') requestAnimationFrame(()=>animateGauge(pulse().score));
+    }
+
+    // ---- INIT ----
+    function init() {
+      if(!S.onboarded){const ov=document.getElementById('onboard');if(ov){ov.style.display='flex';obShowStep(0);}}
+      render();
+    }
+
+    // ---- EXPOSE GLOBALS ----
+    Object.assign(window, {
+      go,render,closeSheet,openSheet,openEmergency,closeEmergency,fabAction,
+      toggleTask,sheetGoal,saveGoal,sheetProject,saveProject,sheetTask,saveTask,
+      sheetHome,saveHome,sheetVehicle,saveVehicle,sheetService,saveService,
+      sheetDoc,saveDoc,viewScan,startScan,dropAnything,doUnlock,lockVault,sheetUnlock,
+      sheetPerson,savePerson,sheetInsurance,saveInsurance,sheetMedical,saveMedical,
+      sheetLegacyText,sheetLegacyContact,saveLegacyContact,delLegacyContact,
+      sheetBill,saveBill,sheetSub,saveSub,sheetDebt,saveDebt,sheetAsset,saveAsset,
+      delItem,cancelSub,exportBackup,restoreBackup,eraseAll,sheetProfile,saveProfile,
+      sheetPulse,sheetEmergency,saveEmergency,startCheckout,openPortal,signOut,
+      sheetSignIn,sendCode,verifyCode,resolveSync,openSearch,renderSearch,
+      startTour,nextTour,endTour,loadSample,obNext,obSelect,obFinish,obSample
+    });
+
+    // ---- BOOT ----
+    try { init(); } catch(err) { console.error('init failed',err); document.getElementById('view').innerHTML='<div class="empty" style="padding:60px 20px"><p>Something went wrong. Your data is safe.</p><button class="btn btn-ink" onclick="location.reload()">Reload</button></div>'; }
+    try { cloudInit(); } catch(err) { console.warn('cloud unavailable',err); }
+
+    const hideSplash=()=>document.getElementById('splash')?.classList.add('gone');
+    setTimeout(hideSplash,700);
+    window.addEventListener('load',()=>{setTimeout(hideSplash,650);if(new URLSearchParams(location.search).has('emergency'))openEmergency();});
+    if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').then(r=>r.update()).catch(()=>{}));
+  }
+
+  renderVals() { return {}; }
+}
+
+</script>
+</body>
+</html>
