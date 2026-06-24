@@ -1,67 +1,51 @@
-import Anthropic from '@anthropic-ai/sdk';
-import { createClient } from '@supabase/supabase-js';
+/**
+ * Keptly — AI Document Extraction via Claude
+ * Called after OCR scan to auto-fill title, category, ref number and expiry date.
+ * Vercel env vars needed:
+ *   ANTHROPIC_API_KEY — from console.anthropic.com
+ *
+ * Install: npm install @anthropic-ai/sdk
+ */
+const Anthropic = require('@anthropic-ai/sdk');
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-/* Extracts structured document fields from OCR text (and optionally the image).
-   Gated to signed-in Premium users so it can't be abused to burn API credits. */
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
+
+  const { text } = req.body;
+  if (!text || text.trim().length < 10) return res.json({});
 
   try {
-    // 1) Verify the user
-    const token = (req.headers.authorization || '').replace('Bearer ', '');
-    const { data: { user }, error: authErr } = await admin.auth.getUser(token);
-    if (authErr || !user) return res.status(401).json({ error: 'Sign in required' });
+    const msg = await client.messages.create({
+      model: 'claude-opus-4-5',
+      max_tokens: 256,
+      messages: [{
+        role: 'user',
+        content: `Extract document metadata from the OCR text below. Return ONLY valid JSON, nothing else.
 
-    // 2) Verify Premium (extraction is a paid feature)
-    const { data: prof } = await admin.from('profiles').select('plan,status').eq('id', user.id).single();
-    const premium = prof && (prof.status === 'active' || prof.status === 'trialing');
-    if (!premium) return res.status(402).json({ error: 'Premium required' });
+Required fields:
+- title: the document name or type (e.g. "Passport", "Car Insurance", "Lease Agreement")  
+- category: exactly one of: Identity | Financial | Medical | Insurance | Property | Vehicle | Other
+- ref: reference/policy/document number (empty string if not found)
+- expires: expiry/renewal date as YYYY-MM-DD (empty string if not found)
 
-    const { text = '', image = null } = req.body || {};
-    if (!text && !image) return res.status(400).json({ error: 'Nothing to read' });
-
-    // 3) Build the message — prefer text (cheap, fast); fall back to the image if no usable text
-    const sys = `You extract structured data from a single personal/household document (passport, insurance card, registration, warranty, lease, receipt, medical card, etc.).
-Return ONLY a JSON object, no markdown, no prose, with exactly these keys:
-{"title": string, "category": one of ["Identity","Insurance","Contracts","Receipts","Warranties","Medical","Property","Other"], "ref": string, "expires": "YYYY-MM-DD" or "", "provider": string, "confidence": 0-1}
-Rules: title is a short human label (e.g. "Passport — A. Doe", "Auto Insurance — Northstar"). ref is the most important policy/account/ID number, digits and dashes only. expires is the single most relevant future expiry/renewal date, else "". provider is the issuing company/agency if present, else "". If unsure, use "" and lower confidence. Never invent values.`;
-
-    const content = [];
-    if (image && image.data && image.media_type) {
-      content.push({ type: 'image', source: { type: 'base64', media_type: image.media_type, data: image.data } });
-    }
-    content.push({ type: 'text', text: text ? `Document text:\n${text.slice(0, 6000)}` : 'Read the attached document image.' });
-
-    const msg = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',   // fast + cheap for extraction
-      max_tokens: 400,
-      system: sys,
-      messages: [{ role: 'user', content }]
+OCR text:
+${text.slice(0, 3000)}`
+      }]
     });
 
-    // 4) Parse the model's JSON safely
-    const raw = (msg.content || []).filter(b => b.type === 'text').map(b => b.text).join('').trim();
-    const clean = raw.replace(/```json|```/g, '').trim();
-    let parsed;
-    try { parsed = JSON.parse(clean); }
-    catch (e) { return res.status(200).json({ ok: false, error: 'Could not parse document', raw: clean.slice(0, 200) }); }
+    const raw = msg.content[0].text.trim();
+    const match = raw.match(/\{[\s\S]*?\}/);
+    if (!match) return res.json({});
 
-    // 5) Whitelist the fields we return
-    const cats = ['Identity','Insurance','Contracts','Receipts','Warranties','Medical','Property','Other'];
-    return res.status(200).json({
-      ok: true,
-      title: String(parsed.title || '').slice(0, 80),
-      category: cats.includes(parsed.category) ? parsed.category : 'Other',
-      ref: String(parsed.ref || '').slice(0, 40),
-      expires: /^\d{4}-\d{2}-\d{2}$/.test(parsed.expires) ? parsed.expires : '',
-      provider: String(parsed.provider || '').slice(0, 60),
-      confidence: Math.max(0, Math.min(1, Number(parsed.confidence) || 0))
-    });
-  } catch (e) {
-    console.error('extract error', e);
-    return res.status(500).json({ error: 'Extraction unavailable' });
+    const parsed = JSON.parse(match[0]);
+    // Validate category
+    const valid = ['Identity','Financial','Medical','Insurance','Property','Vehicle','Other'];
+    if (!valid.includes(parsed.category)) parsed.category = 'Other';
+    res.json(parsed);
+  } catch (err) {
+    console.error('Claude extraction error:', err.message);
+    res.json({}); // Fail silently — user can fill in manually
   }
-}
+};

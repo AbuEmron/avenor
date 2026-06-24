@@ -1,50 +1,43 @@
-import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+/**
+ * Keptly — Create Stripe Checkout Session
+ * Vercel env vars needed:
+ *   STRIPE_SECRET_KEY
+ *   STRIPE_PRICE_MONTHLY_ID  (e.g. price_xxx — from Stripe Dashboard → Products)
+ *   STRIPE_PRICE_ANNUAL_ID   (e.g. price_yyy)
+ *   APP_URL                  (e.g. https://keptly.app)
+ */
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const admin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+module.exports = async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).end();
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  const { interval, user_id } = req.body;
+
+  const priceId = interval === 'yearly'
+    ? process.env.STRIPE_PRICE_ANNUAL_ID
+    : process.env.STRIPE_PRICE_MONTHLY_ID;
+
+  if (!priceId) {
+    console.error('Missing Stripe price ID for interval:', interval);
+    return res.status(500).json({ error: 'Price not configured — add STRIPE_PRICE_MONTHLY_ID / STRIPE_PRICE_ANNUAL_ID to Vercel env' });
+  }
+
+  const baseUrl = process.env.APP_URL || `https://${req.headers.host}`;
 
   try {
-    // Verify the signed-in user from their Supabase access token
-    const token = (req.headers.authorization || '').replace('Bearer ', '');
-    const { data: { user }, error } = await admin.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: 'Sign in required' });
-
-    const interval = (req.body && req.body.interval) === 'yearly' ? 'yearly' : 'monthly';
-    const price = interval === 'yearly' ? process.env.STRIPE_PRICE_YEARLY : process.env.STRIPE_PRICE_MONTHLY;
-
-    // Reuse or create the Stripe customer for this user
-    const { data: prof } = await admin.from('profiles')
-      .select('stripe_customer_id').eq('id', user.id).single();
-    let customerId = prof && prof.stripe_customer_id;
-    if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: { user_id: user.id }
-      });
-      customerId = customer.id;
-      await admin.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id);
-    }
-
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      customer: customerId,
-      line_items: [{ price, quantity: 1 }],
-      subscription_data: {
-        trial_period_days: 14,
-        metadata: { user_id: user.id }
-      },
+      payment_method_types: ['card'],
+      line_items: [{ price: priceId, quantity: 1 }],
+      client_reference_id: user_id,
       allow_promotion_codes: true,
-      success_url: `${process.env.SITE_URL}/app.html#settings`,
-      cancel_url: `${process.env.SITE_URL}/app.html#settings`
+      subscription_data: { trial_period_days: 14 },
+      success_url: `${baseUrl}/#settings`,
+      cancel_url:  `${baseUrl}/#settings`,
     });
-
-    return res.status(200).json({ url: session.url });
-  } catch (e) {
-    console.error('checkout error', e);
-    return res.status(500).json({ error: 'Could not start checkout' });
+    res.json({ url: session.url });
+  } catch (err) {
+    console.error('Stripe checkout error:', err.message);
+    res.status(500).json({ error: err.message });
   }
-}
+};
