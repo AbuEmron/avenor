@@ -1,36 +1,25 @@
-/**
- * Keptly — Stripe Billing Portal
- * Opens the Stripe Customer Portal so users can cancel, upgrade, update card.
- * Vercel env vars needed:
- *   STRIPE_SECRET_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, APP_URL
- */
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { createClient } = require('@supabase/supabase-js');
+import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const sb = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
+  process.env.SUPABASE_URL || 'https://zfzkgixkvygbcpoipxdk.supabase.co',
+  process.env.SUPABASE_SERVICE_ROLE_KEY || ''
 );
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
 
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.replace('Bearer ', '');
+  const token = (req.headers.authorization || '').replace('Bearer ', '');
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
 
-  const { data: { user }, error: authErr } = await sb.auth.getUser(token);
-  if (authErr || !user) return res.status(401).json({ error: 'Invalid token' });
+  const { data: { user }, error } = await sb.auth.getUser(token);
+  if (error || !user) return res.status(401).json({ error: 'Invalid token' });
 
-  const { data: profile } = await sb.from('profiles')
-    .select('stripe_customer_id').eq('id', user.id).single();
-
-  if (!profile?.stripe_customer_id) {
-    return res.status(400).json({ error: 'No billing account — please subscribe first' });
-  }
+  const { data: profile } = await sb.from('profiles').select('stripe_customer_id').eq('id', user.id).single();
+  if (!profile?.stripe_customer_id) return res.status(400).json({ error: 'No billing account' });
 
   const baseUrl = process.env.APP_URL || `https://${req.headers.host}`;
-
   try {
     const session = await stripe.billingPortal.sessions.create({
       customer: profile.stripe_customer_id,
@@ -41,4 +30,4 @@ module.exports = async function handler(req, res) {
     console.error('Portal error:', err.message);
     res.status(500).json({ error: err.message });
   }
-};
+}
